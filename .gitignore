@@ -1,0 +1,36 @@
+# Node.js
+node_modules/
+npm-debug.log
+.env
+
+# React (Vite)
+dist/
+*.local
+.vite/
+
+# Logs
+logs/
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+
+# Dependencies
+client/node_modules/
+server/node_modules/
+
+# Build output
+client/dist/
+server/dist/
+
+# Environment variables
+client/.env
+server/.env
