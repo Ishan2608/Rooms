@@ -10,7 +10,7 @@ The project consists of two main folders:
 - client: Contains the React.js frontend code, built with Material UI components
 - server: Houses the Node.js and Express.js backend code, with MongoDB integration
 ## Setup and Installation
-- Clone the repository: git clone https://github.com/your-username/rooms.git
+- Clone the repository: git clone https://github.com/Ishan2608/Rooms.git
 - Navigate to the project directory: cd rooms
 - Install dependencies:
 - - cd client && npm install
@@ -27,4 +27,4 @@ License
 This project is licensed under the MIT License. See LICENSE for details.
 Acknowledgments
 Special thanks to the Material UI team for their excellent component library
-Note: Replace https://github.com/your-username/rooms.git with your actual GitHub repository URL.
+Note: Replace https://github.com/Ishan2608/Rooms.git with your actual GitHub repository URL.
