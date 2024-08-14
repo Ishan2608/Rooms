@@ -13,8 +13,8 @@ The project consists of two main folders:
 - Clone the repository: git clone https://github.com/Ishan2608/Rooms.git
 - Navigate to the project directory: cd rooms
 - Install dependencies:
-- - cd client && npm install
-- - cd server && npm install
+  - cd client && npm install
+  - cd server && npm install
 - Start the server: cd server && npm start
 - Start the client: cd client && npm start
 ## Usage
