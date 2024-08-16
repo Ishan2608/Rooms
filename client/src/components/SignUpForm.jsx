@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "./AuthContext";
 
 // Imports from Material UI
 import {
@@ -16,6 +17,7 @@ import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 import "../index.css";
+import { API_ROUTES } from "../api/constants";
 
 const steps = ["Set Email & Username", "Set Profile Pic", "Set Password"];
 const VisuallyHiddenInput = styled("input")({
@@ -31,6 +33,11 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const SignUpForm = () => {
+  const { login, isAuthenticated } = useAuthContext();
+  // Check if the user is already logged in
+  if (isAuthenticated) {
+    navigate("/profile");
+  }
   const nav = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [form, setForm] = useState({
@@ -46,6 +53,29 @@ const SignUpForm = () => {
   const [alertMsg, setAlertMsg] = useState(null);
   const [severity, setSeverity] = useState("error");
   const [imageSrc, setImageSrc] = useState(null);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        image: file,
+      }));
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const validateForm = (form) => {
     if (form.email === "") {
@@ -68,11 +98,6 @@ const SignUpForm = () => {
       setAlertMsg("Username not specified");
       return false;
     }
-    if (form.image === null) {
-      setSeverity("error");
-      setAlertMsg("Profile picture not uploaded");
-      return false;
-    }
     if (form.password === "") {
       setSeverity("error");
       setAlertMsg("Password not specified");
@@ -89,38 +114,34 @@ const SignUpForm = () => {
     return true; // Return true if the form is valid
   };
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setForm((prevForm) => ({
-        ...prevForm,
-        image: file,
-      }));
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImageSrc(reader.result);
-      };
-      reader.readAsDataURL(file);
+  const callSignUpAPI = async (formData) => {
+    try {
+      const response = await axios.post(API_ROUTES.SIGN_UP, formData);
+      if (response.status === 201) {
+        const token = response.headers["set-cookie"][0].split("=")[1];
+        login(response.data, token);
+        nav("/chats");
+      } else {
+        setSeverity("error");
+        setAlertMsg(`ERROR: ${response.data}`);
+      }
+    } catch (error) {
+      if (error.response) {
+        setSeverity("error");
+        setAlertMsg(`ERROR: ${error.response.data}`);
+      } else {
+        setAlertMsg("Sign Up Failed");
+        setSeverity("error");
+      }
     }
   };
-
 
   const handleSignUp = () => {
     // Run validation and only proceed if it returns true
     const isFormValid = validateForm(form);
     if (isFormValid) {
       console.log("Form is Good to Go");
-      console.log(form);
-      nav("/profile");
+      callSignUpAPI(form);
     } else {
       console.log("Form cannot be submitted");
     }
@@ -273,10 +294,7 @@ const SignUpForm = () => {
             Back
           </Button>
           {activeStep === steps.length - 1 ? (
-            <Button
-              variant="contained"
-              onClick={handleSignUp}
-            >
+            <Button variant="contained" onClick={handleSignUp}>
               Sign Up
             </Button>
           ) : (

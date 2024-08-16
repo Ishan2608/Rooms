@@ -9,7 +9,7 @@ const createToken = (email, userId) => {
 
 export const signup = async (req, res, next) => {
     try{
-      const { firstName, lastName, userName, email, password, image } = req.body;
+      const { firstName, lastName, userName, email, password } = req.body;
       if (!email) {
         return res.status(400).send("Email is missing");
       }
@@ -26,14 +26,29 @@ export const signup = async (req, res, next) => {
         return res.status(400).send("Username is missing");
       }
 
+      // Check if email already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).send("Email already exists");
+      }
+
       const user = await User.create({
         firstName,
         lastName,
         userName,
         email,
         password,
-        image,
       });
+
+      // Update image if provided
+      if (req.file) {
+        const folderPath = `/images/users/${user.id}`;
+        const imageUrl = `${folderPath}/${req.file.filename}`;
+        user.image = imageUrl;
+      }
+
+      // Save updated user
+      const userData = await user.save();
 
       res.cookie("jwt", createToken(email, user.id), {
         maxAge,
@@ -53,6 +68,7 @@ export const signup = async (req, res, next) => {
     }
     catch (err){
         console.log(err);
+        return res.status(500).send("Error creating user");
     }
 }
 
@@ -68,7 +84,7 @@ export const login = async (req, res, next) => {
 
         const user = await User.findOne({email});
         if(!user){
-            return res.status(404).send("User not find. Please Sign Up");
+            return res.status(404).send("User not found. Please Sign Up");
         }
 
         const auth = await bcrypt.compare(password, user.password);
@@ -92,6 +108,7 @@ export const login = async (req, res, next) => {
     }
     catch (err){
         console.log(err);
+        return res.status(500).send("Login failed");
     }
 
 }

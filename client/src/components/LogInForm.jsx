@@ -5,7 +5,12 @@ import Alert from "@mui/material/Alert";
 
 import "../index.css";
 
+import axios from "axios";
+import { useAuthContext } from "./AuthContext";
+import { API_ROUTES } from '../api/constants';
+
 const LogInForm = () => {
+  const { login } = useAuthContext();
   const nav = useNavigate();
   const [form, setForm] = useState({
     email: "",
@@ -31,12 +36,42 @@ const LogInForm = () => {
     return true;
   };
 
+  const callLogInAPI = async (form) => {
+    try {
+      const response = await axios.post(API_ROUTES.LOG_IN, form);
+      if (response.status === 200) {
+        const token = response.headers["set-cookie"][0].split("=")[1];
+        login(response.data, token);
+        nav("/chats");
+      } else {
+        setAlertMsg(response.data);
+        setSeverity("error");
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 400) {
+          setAlertMsg(error.response.data);
+          setSeverity("error");
+        } else if (error.response.status === 404) {
+          setAlertMsg(error.response.data);
+          setSeverity("error");
+        } else {
+          setAlertMsg("Login failed");
+          setSeverity("error");
+        }
+      } else {
+        setAlertMsg("Login failed");
+        setSeverity("error");
+      }
+    }
+  };
+
   const handleLogIn = () => {
     const isFormValid = validateForm(form);
     if (isFormValid) {
       console.log("Form is Good to Go");
       console.log(form);
-      nav("/profile");
+      callLogInAPI(form);
     } else {
       console.log("Form cannot be submitted");
     }

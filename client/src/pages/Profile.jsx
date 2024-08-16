@@ -1,35 +1,24 @@
 import React, { useState, useRef } from "react";
-import {
-  Box,
-  Avatar,
-  Button,
-  Card,
-  CardContent,
-  IconButton,
-  TextField,
-  Typography,
-  Snackbar,
-  Alert,
+import { 
+  Box, Avatar, Button, Card, CardContent, IconButton, 
+  TextField, Typography, Snackbar, Alert
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CloseIcon from "@mui/icons-material/Close"
 import { deepPurple, green, red } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "./AuthContext";
+import { API_ROUTES } from "../api/constants";
 
 const Profile = () => {
+  // access global context
+  const { user } = useAuthContext();
   // Navigate hook
   const navigate = useNavigate();
 
   // Initial user data
-  const [userData, setUserData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    username: "johndoe",
-    password: "password",
-  });
+  const [userData, setUserData] = useState({user});
 
   // State for the profile picture and Snackbar
   const [profilePic, setProfilePic] = useState(null);
@@ -57,11 +46,33 @@ const Profile = () => {
     return isValid;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (validateForm()) {
-      // Handle save logic (e.g., API call)
-      console.log("User data saved:", userData);
-      setSnackbarType("success");
+      try {
+        const formData = new FormData();
+        formData.append("firstName", userData.firstName);
+        formData.append("lastName", userData.lastName);
+        formData.append("email", userData.email);
+        formData.append("username", userData.username);
+        formData.append("password", userData.password);
+        if (profilePic) {
+          formData.append("image", profilePic);
+        } else {
+          formData.append("image", "");
+        }
+
+        const response = await axios.post(API_ROUTES.UPDATE_PROFILE, formData);
+
+        if (response.status === 200) {
+          console.log("User data saved:", userData);
+          setSnackbarType("success");
+        } else {
+          setSnackbarType("error");
+        }
+      } catch (error) {
+        console.error("Error saving user data:", error);
+        setSnackbarType("error");
+      }
     } else {
       setSnackbarType("error");
     }
