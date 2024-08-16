@@ -6,7 +6,7 @@ import Alert from "@mui/material/Alert";
 import "../index.css";
 
 import axios from "axios";
-import { useAuthContext } from "./AuthContext";
+import { useAuthContext } from "../context/AuthContext";
 import { API_ROUTES } from '../api/constants';
 
 const LogInForm = () => {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "./AuthContext";
+import { useAuthContext } from "../context/AuthContext";
 
 // Imports from Material UI
 import {

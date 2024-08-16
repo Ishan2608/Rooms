@@ -8,7 +8,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { deepPurple, green, red } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "./AuthContext";
+import { useAuthContext } from "../context/AuthContext";
 import { API_ROUTES } from "../api/constants";
 
 const Profile = () => {

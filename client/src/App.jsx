@@ -1,12 +1,12 @@
 // Import React Methods and Components
-import React from 'react';
-import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Import your custom components
 import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
-import { useAuthContext } from './AuthContext';
+import { useAuthContext, AuthProvider } from "./context/AuthContext";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -17,29 +17,34 @@ const darkTheme = createTheme({
   },
 });
 
-// Import Globals
+// ProtectedRoute component to handle authentication
+const ProtectedRoute = ({ element }) => {
+  const { isAuthenticated } = useAuthContext();
+  return isAuthenticated ? element : <Navigate to="/auth" />;
+};
 
 const App = () => {
-  const { isAuthenticated } = useAuthContext();
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route
-            path="/chat"
-            element={isAuthenticated ? <Chat /> : <Navigate to="/auth" />}
-          />
-          <Route
-            path="/profile"
-            element={isAuthenticated ? <Profile /> : <Navigate to="/auth" />}
-          />
-          <Route path="*" element={<Navigate to="/auth" />} />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route
+              path="/chat"
+              element={<ProtectedRoute element={<Chat />} />}
+            />
+            <Route
+              path="/profile"
+              element={<ProtectedRoute element={<Profile />} />}
+            />
+            <Route path="*" element={<Navigate to="/auth" />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </AuthProvider>
   );
-}
+};
 
-export default App
+export default App;

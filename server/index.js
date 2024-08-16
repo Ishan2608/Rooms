@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
-import authRoutes from "./routes/AuthRoutes";
+import authRoutes from "./routes/AuthRoutes.js";
 import multer from "multer";
 
 // get values to be used globally
