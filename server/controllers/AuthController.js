@@ -9,7 +9,9 @@ const createToken = (email, userId) => {
 
 export const signup = async (req, res, next) => {
     try{
-      const { firstName, lastName, userName, email, password } = req.body;
+      console.log("Request Body:", req.body); // Log fields from req.body
+      console.log("Uploaded File:", req.file); // Log file info from req.file
+      const { firstName, lastName, username, email, password } = req.body;
       if (!email) {
         return res.status(400).send("Email is missing");
       }
@@ -22,7 +24,7 @@ export const signup = async (req, res, next) => {
       if (!lastName) {
         return res.status(400).send("Last Name is missing");
       }
-      if (!userName) {
+      if (!username) {
         return res.status(400).send("Username is missing");
       }
 
@@ -31,15 +33,16 @@ export const signup = async (req, res, next) => {
       if (existingUser) {
         return res.status(400).send("Email already exists");
       }
-
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
       const user = await User.create({
         firstName,
         lastName,
-        userName,
+        username,
         email,
-        password,
+        password: hashedPassword,
       });
-
+      
       // Update image if provided
       if (req.file) {
         const folderPath = `/images/users/${user.id}`;
@@ -50,7 +53,7 @@ export const signup = async (req, res, next) => {
       // Save updated user
       const userData = await user.save();
 
-      res.cookie("jwt", createToken(email, user.id), {
+      res.cookie("jwt", createToken(email, userData.id), {
         maxAge,
         secure: true,
         sameSite: "None",
@@ -58,12 +61,12 @@ export const signup = async (req, res, next) => {
 
       // status code 200 means success for POST request
       return res.status(201).json({
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        userName: user.userName,
-        email: user.email,
-        image: user.image,
+        id: userData.id,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        username: userData.username,
+        email: userData.email,
+        image: userData.image,
       });
     }
     catch (err){
@@ -74,6 +77,7 @@ export const signup = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
     try{
+        console.log(req.body);
         const {email, password} = req.body;
         if (!email){
             return res.status(400).send("Email is missing");
@@ -101,7 +105,7 @@ export const login = async (req, res, next) => {
             id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
-            userName: user.userName,
+            username: user.username,
             email: user.email,
             image: user.image
         });
@@ -123,7 +127,7 @@ export const getUserInfo = async (req, res, next) => {
             id: userData.id,
             firstName: userData.firstName,
             lastName: userData.lastName,
-            userName: userData.userName,
+            username: userData.username,
             email: userData.email,
             password: userData.password,
             image: userData.image
@@ -137,7 +141,7 @@ export const getUserInfo = async (req, res, next) => {
 export const updateProfileInfo = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const { firstName, lastName, userName, email, password } = req.body;
+    const { firstName, lastName, username, email, password } = req.body;
 
     // Find user by ID
     const user = await User.findById(userId);
@@ -149,7 +153,7 @@ export const updateProfileInfo = async (req, res, next) => {
     // Update user fields
     user.firstName = firstName;
     user.lastName = lastName;
-    user.userName = userName;
+    user.username = username;
     user.email = email;
 
     // Hash password if provided
@@ -175,7 +179,7 @@ export const updateProfileInfo = async (req, res, next) => {
       id: userData.id,
       firstName: userData.firstName,
       lastName: userData.lastName,
-      userName: userData.userName,
+      username: userData.username,
       email: userData.email,
       image: userData.image,
     });

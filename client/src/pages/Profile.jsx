@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Box, Avatar, Button, Card, CardContent, IconButton, 
   TextField, Typography, Snackbar, Alert
@@ -10,15 +10,31 @@ import { deepPurple, green, red } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { API_ROUTES } from "../api/constants";
+import axios from "axios"
+
+import "../index.css"
 
 const Profile = () => {
   // access global context
-  const { user } = useAuthContext();
-  // Navigate hook
+  const { isAuthenticated, user, setUser, logout} = useAuthContext();
   const navigate = useNavigate();
 
-  // Initial user data
-  const [userData, setUserData] = useState({user});
+  // Redirect if the user is already authenticated
+  useEffect(() => {
+    // console.log(user)
+    if (!isAuthenticated) {
+      navigate("/auth");
+    }
+  }, [isAuthenticated, navigate, user]);
+
+  const [userData, setUserData] = useState(() => ({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    username: user?.username || "",
+    password: "",
+  }));
+
 
   // State for the profile picture and Snackbar
   const [profilePic, setProfilePic] = useState(null);
@@ -41,11 +57,12 @@ const Profile = () => {
       lastName &&
       email &&
       username &&
-      password &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     return isValid;
   };
-
+  const handleLogOut = async () => {
+    logout();
+  }
   const handleSave = async () => {
     if (validateForm()) {
       try {
@@ -61,10 +78,17 @@ const Profile = () => {
           formData.append("image", "");
         }
 
-        const response = await axios.post(API_ROUTES.UPDATE_PROFILE, formData);
+        const response = await axios.post(API_ROUTES.UPDATE_PROFILE, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        });
 
         if (response.status === 200) {
-          console.log("User data saved:", userData);
+          console.log("User data saved:", response.data);
+          setUser(response.data);
+
           setSnackbarType("success");
         } else {
           setSnackbarType("error");
@@ -77,6 +101,10 @@ const Profile = () => {
       setSnackbarType("error");
     }
     setOpenSnackbar(true);
+  };
+
+  const handleDeleteImage = () => {
+    setProfilePic(null);
   };
 
   const handleEditImage = () => {
@@ -96,9 +124,6 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteImage = () => {
-    setProfilePic(null);
-  };
 
   const getInitials = () => {
     return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase();
@@ -124,22 +149,6 @@ const Profile = () => {
         padding: 2,
       }}
     >
-      {/* <Snackbar
-        open={openSnackbar}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        message={
-          snackbarType === "success"
-            ? "Profile saved successfully"
-            : "Please fill out all fields correctly"
-        }
-        action={
-          <IconButton onClick={handleCloseSnackbar} color="inherit">
-            <CloseIcon />
-          </IconButton>
-        }
-      /> */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}
@@ -245,7 +254,7 @@ const Profile = () => {
             onChange={handleInputChange}
           />
           <TextField
-            label="Username"
+            label="username"
             variant="outlined"
             required
             fullWidth
@@ -265,9 +274,15 @@ const Profile = () => {
             value={userData.password}
             onChange={handleInputChange}
           />
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            Save
-          </Button>
+          <div className="flex-row">
+
+            <Button variant="contained" color="primary" onClick={handleSave}>
+              Save
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleLogOut}>
+              Log Out
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </Box>

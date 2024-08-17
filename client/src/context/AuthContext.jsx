@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback} from "react";
 import axios from "axios";
 import { API_ROUTES } from "../api/constants.js";
 
@@ -36,6 +30,8 @@ const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     setIsAuthenticated(false);
+    // Optionally, clear the cookie as well
+    document.cookie = "jwt=";
   }, []);
 
   const fetchUserData = useCallback(async () => {
@@ -46,6 +42,7 @@ const AuthProvider = ({ children }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        withCredentials: true
       });
       setUser(response.data);
       setIsAuthenticated(true);
@@ -57,7 +54,7 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const cookieToken = document.cookie
       .split("; ")
-      .find((row) => row.startsWith("token="))
+      .find((row) => row.startsWith("jwt="))
       ?.split("=")[1];
     if (cookieToken) {
       setToken(cookieToken);
@@ -66,9 +63,7 @@ const AuthProvider = ({ children }) => {
   }, [fetchUserData]);
 
   return (
-    <AuthContext.Provider
-      value={{ user, token, login, logout, isAuthenticated }}
-    >
+    <AuthContext.Provider value={{ user, setUser, token, login, logout, isAuthenticated }} >
       {children}
     </AuthContext.Provider>
   );

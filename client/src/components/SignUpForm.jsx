@@ -1,25 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
+import axios from "axios";
 
 // Imports from Material UI
-import {
-  Grid,
-  TextField,
-  Button,
-  Stack,
-  Stepper,
-  Step,
-  StepLabel,
-  Alert,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Grid, TextField, Button, Stack, Stepper, Step, StepLabel, Alert} from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { styled } from "@mui/material/styles";
 
-import "../index.css";
 import { API_ROUTES } from "../api/constants";
+import "../index.css";
 
-const steps = ["Set Email & Username", "Set Profile Pic", "Set Password"];
+const steps = ["Set Email & username", "Set Profile Pic", "Set Password"];
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -34,11 +26,15 @@ const VisuallyHiddenInput = styled("input")({
 
 const SignUpForm = () => {
   const { login, isAuthenticated } = useAuthContext();
-  // Check if the user is already logged in
-  if (isAuthenticated) {
-    navigate("/profile");
-  }
   const nav = useNavigate();
+
+  // Redirect if the user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      nav("/profile");
+    }
+  }, [isAuthenticated, nav]);
+
   const [activeStep, setActiveStep] = useState(0);
   const [form, setForm] = useState({
     firstName: "",
@@ -95,7 +91,7 @@ const SignUpForm = () => {
     }
     if (form.username === "") {
       setSeverity("error");
-      setAlertMsg("Username not specified");
+      setAlertMsg("username not specified");
       return false;
     }
     if (form.password === "") {
@@ -114,19 +110,45 @@ const SignUpForm = () => {
     return true; // Return true if the form is valid
   };
 
-  const callSignUpAPI = async (formData) => {
+  const callSignUpAPI = async (form) => {
+    const data = new FormData();
+    data.append("firstName", form.firstName);
+    data.append("lastName", form.lastName);
+    data.append("username", form.username);
+    data.append("email", form.email);
+    data.append("password", form.password);
+    if (form.image) {
+      data.append("image", form.image); // Attach the image file
+    }
+    
+    for (let [key, value] of data.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+    
     try {
-      const response = await axios.post(API_ROUTES.SIGN_UP, formData);
+      const response = await axios.post(API_ROUTES.SIGN_UP, data, 
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
       if (response.status === 201) {
-        const token = response.headers["set-cookie"][0].split("=")[1];
-        login(response.data, token);
-        nav("/chats");
+        // console.log("Status: 201");
+        const cookieToken = document.cookie.split("; ")
+          .find((row) => row.startsWith("jwt="))
+          ?.split("=")[1];
+        // console.log(`The Received Token is: \n${cookieToken}`);
+        login(response.data, cookieToken);
+        nav("/profile");
       } else {
         setSeverity("error");
         setAlertMsg(`ERROR: ${response.data}`);
       }
     } catch (error) {
       if (error.response) {
+        console.log("Response Data:", error.response.data); // Add this line
         setSeverity("error");
         setAlertMsg(`ERROR: ${error.response.data}`);
       } else {
@@ -134,6 +156,7 @@ const SignUpForm = () => {
         setSeverity("error");
       }
     }
+
   };
 
   const handleSignUp = () => {
@@ -144,6 +167,7 @@ const SignUpForm = () => {
       callSignUpAPI(form);
     } else {
       console.log("Form cannot be submitted");
+      return;
     }
   };
 
