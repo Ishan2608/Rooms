@@ -57,12 +57,12 @@ const ChatsHeader = ({ name, image }) => {
         onClose={handleMenuClose}
         PaperProps={{
           style: {
-            backgroundColor: "#424242",
-            color: "#fff",
+            backgroundColor: "#DC143C",
+            color: "#FFFFFF",
           },
         }}
       >
-        <MenuItem onClick={handleDeleteContact} style={{ color: "#f44336" }}>
+        <MenuItem onClick={handleDeleteContact} >
           Delete Contact
         </MenuItem>
       </Menu>

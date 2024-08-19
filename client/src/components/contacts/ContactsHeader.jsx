@@ -15,10 +15,10 @@ import SearchContacts from "./SearchContacts"; // Import the SearchContacts moda
 import FormGroup from "./FormGroup"; // Import the FormGroup modal
 
 const ContactsHeader = () => {
-  const { isAuthenticated, user, logout } = useAuthContext();
+  const { isAuthenticated, user } = useAuthContext();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [openModal, setOpenModal] = useState(null); // null means no modal is open
+  const [openModal, setOpenModal] = useState(null);
 
   // Redirect if the user is not authenticated
   // React.useEffect(() => {
@@ -110,7 +110,6 @@ const ContactsHeader = () => {
           Form a Group
         </MenuItem>
       </Menu>
-
       {/* Modal for Search Contacts */}
       <Modal
         open={openModal === "searchContacts"}
@@ -124,7 +123,7 @@ const ContactsHeader = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: 500,
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
@@ -132,10 +131,9 @@ const ContactsHeader = () => {
             backgroundColor: "#333", // Dark theme modal background
           }}
         >
-          <SearchContacts />
+          <SearchContacts onClose={handleCloseModal}/>
         </Box>
       </Modal>
-
       {/* Modal for Form Group */}
       <Modal
         open={openModal === "formGroup"}
@@ -149,7 +147,7 @@ const ContactsHeader = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: 500,
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
@@ -157,7 +155,7 @@ const ContactsHeader = () => {
             backgroundColor: "#333", // Dark theme modal background
           }}
         >
-          <FormGroup />
+          <FormGroup onClose={handleCloseModal} />
         </Box>
       </Modal>
     </div>
