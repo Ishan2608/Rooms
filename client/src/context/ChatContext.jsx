@@ -14,31 +14,57 @@ const useChatContext = () => {
 
 // Provider component
 const ChatProvider = ({ children }) => {
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedContact, setSelectedContact] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [contacts, setContacts] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [currentMessages, setCurrentMessages] = useState([]);
 
-  const selectUser = useCallback((user) => {
-    setSelectedUser(user);
+  const selectContact = useCallback((contact) => {
+    setSelectedContact(contact);
+    setSelectedGroup(null); // Clear selected group when a contact is selected
+    fetchChatMessages(contact);
   }, []);
 
   const selectGroup = useCallback((group) => {
     setSelectedGroup(group);
+    setSelectedContact(null); // Clear selected contact when a group is selected
+    fetchChatMessages(group);
   }, []);
 
   const updateContacts = useCallback((newContacts) => {
     setContacts(newContacts);
   }, []);
 
+  const updateGroups = useCallback((newGroups) => {
+    setGroups(newGroups);
+  }, []);
+
+  const fetchChatMessages = useCallback(async (chatEntity) => {
+    try {
+      // Replace with actual API call or logic to fetch chat messages
+      const response = await fetch(`/api/messages/${chatEntity.id}`);
+      const messages = await response.json();
+      setCurrentMessages(messages);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
+      setCurrentMessages([]); // Clear messages on error
+    }
+  }, []);
+
   return (
     <ChatContext.Provider
       value={{
-        selectedUser,
-        selectedGroup,
         contacts,
-        selectUser,
+        selectedContact,
+        groups,
+        selectedGroup,
+        currentMessages,
+        selectContact,
         selectGroup,
         updateContacts,
+        updateGroups,
+        setCurrentMessages,
       }}
     >
       {children}

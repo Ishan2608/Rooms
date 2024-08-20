@@ -8,38 +8,49 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactGroupCard from "./ContactGroupCard"; // Ensure the path is correct
+import { useChatContext } from "../../context/ChatContext";
 
 const ContactsList = () => {
+
+  const {selectContact} = useChatContext();
+
   // Dummy data for contacts
   const contacts = [
-    { _id: "1", username: "JohnDoe", image: "https://via.placeholder.com/50" },
+    { _id: "1", name: "JohnDoe", image: "https://via.placeholder.com/50" },
     {
       _id: "2",
-      username: "JaneSmith",
+      name: "JaneSmith",
       image: "https://via.placeholder.com/50",
     },
     {
       _id: "3",
-      username: "AlexanderTheGreat",
+      name: "AlexanderTheGreat",
       image: "https://via.placeholder.com/50",
     },
     {
       _id: "4",
-      username: "EmilyJohnson",
+      name: "EmilyJohnson",
       image: "https://via.placeholder.com/50",
     },
     {
       _id: "5",
-      username: "ChrisBrown",
+      name: "ChrisBrown",
       image: "https://via.placeholder.com/50",
     },
   ];
 
   // Function to truncate long usernames
-  const truncateUsername = (username) => {
-    return username.length > 10 ? `${username.slice(0, 10)}...` : username;
+  const truncateUsername = (name) => {
+    return name.length > 10 ? `${name.slice(0, 10)}...` : name;
   };
 
+  // Handle contact click
+  const handleContactClick = (id, name) => {
+    console.log(`Clicked contact ID: ${id}, Name: ${name}`);
+
+    // Update the global state with the selected contact
+    selectContact({ id, name });
+  };
   return (
     <Accordion
       defaultExpanded={false}
@@ -68,7 +79,8 @@ const ContactsList = () => {
             <ContactGroupCard
               key={contact._id}
               image={contact.image}
-              username={truncateUsername(contact.username)}
+              name={truncateUsername(contact.name)}
+              onClick={() => handleContactClick(contact._id, contact.name)}
             />
           ))}
         </Box>

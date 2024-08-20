@@ -8,8 +8,11 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactGroupCard from "./ContactGroupCard"; // Ensure the path is correct
+import { useChatContext } from "../../context/ChatContext"; // Import useChatContext
 
 const GroupsList = () => {
+  const { selectGroup } = useChatContext(); // Access selectGroup from context
+
   // Dummy data for groups
   const groups = [
     {
@@ -44,34 +47,40 @@ const GroupsList = () => {
     return groupName.length > 10 ? `${groupName.slice(0, 10)}...` : groupName;
   };
 
+  // Handle group click
+  const handleGroupClick = (group) => {
+    selectGroup(group); // Set selected group in the context
+  };
+
   return (
-      <Accordion
-        defaultExpanded={false}
-        sx={{ backgroundColor: "#333", color: "#fff", marginBottom: "10px" }}
+    <Accordion
+      defaultExpanded={false}
+      sx={{ backgroundColor: "#333", color: "#fff", marginBottom: "10px" }}
+    >
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon sx={{ color: "#fff" }} />}
+        aria-controls="groups-content"
+        id="groups-header"
       >
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon sx={{ color: "#fff" }} />}
-          aria-controls="groups-content"
-          id="groups-header"
-        >
-          <Typography variant="h6">Groups</Typography>
-        </AccordionSummary>
-        <AccordionDetails
-          sx={{
-            maxHeight: "calc(100vh - 150px)",
-          }}
-        >
-          <Box>
-            {groups.map((group) => (
-              <ContactGroupCard
-                username={truncateGroupName(group.groupName)} // Reusing `username` prop for group names
-                key={group._id}
-                image={group.image}
-              />
-            ))}
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+        <Typography variant="h6">Groups</Typography>
+      </AccordionSummary>
+      <AccordionDetails
+        sx={{
+          maxHeight: "calc(100vh - 150px)",
+        }}
+      >
+        <Box>
+          {groups.map((group) => (
+            <ContactGroupCard
+              key={group._id}
+              image={group.image}
+              name={truncateGroupName(group.groupName)}
+              onClick={() => handleGroupClick(group)} // Pass group to the click handler
+            />
+          ))}
+        </Box>
+      </AccordionDetails>
+    </Accordion>
   );
 };
 
