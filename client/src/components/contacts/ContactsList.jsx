@@ -45,11 +45,11 @@ const ContactsList = () => {
   };
 
   // Handle contact click
-  const handleContactClick = (id, name) => {
+  const handleContactClick = (id, name, image) => {
     console.log(`Clicked contact ID: ${id}, Name: ${name}`);
 
     // Update the global state with the selected contact
-    selectContact({ id, name });
+    selectContact({ id, name, image });
   };
   return (
     <Accordion
@@ -80,7 +80,7 @@ const ContactsList = () => {
               key={contact._id}
               image={contact.image}
               name={truncateUsername(contact.name)}
-              onClick={() => handleContactClick(contact._id, contact.name)}
+              onClick={() => handleContactClick(contact._id, contact.name, contact.image)}
             />
           ))}
         </Box>

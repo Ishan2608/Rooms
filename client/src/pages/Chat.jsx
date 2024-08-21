@@ -3,10 +3,13 @@ import ContactsContainer from "../components/contacts/ContactsContainer";
 import ChatsContainer from "../components/chats/ChatsContainer";
 import EmptyChatContainer from "../components/chats/EmptyChatContainer";
 import { Box } from "@mui/material";
+import { useChatContext } from "../context/ChatContext";
 
 const Chat = () => {
-  // Change to false to show ChatsContainer instead
-  const empty = false; 
+  const { selectedContact, selectedGroup } = useChatContext();
+  
+  // Show empty container if no contact or group is selected
+  const empty = !selectedContact && !selectedGroup;
 
   return (
     <Box

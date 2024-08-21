@@ -9,6 +9,7 @@ import {
   Box,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useChatContext } from "../../context/ChatContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import SearchContacts from "./SearchContacts"; // Import the SearchContacts modal

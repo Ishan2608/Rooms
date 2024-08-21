@@ -17,34 +17,34 @@ const GroupsList = () => {
   const groups = [
     {
       _id: "1",
-      groupName: "Group Alpha",
+      name: "Group Alpha",
       image: "https://via.placeholder.com/50",
     },
     {
       _id: "2",
-      groupName: "Group Beta",
+      name: "Group Beta",
       image: "https://via.placeholder.com/50",
     },
     {
       _id: "3",
-      groupName: "Group Gamma",
+      name: "Group Gamma",
       image: "https://via.placeholder.com/50",
     },
     {
       _id: "4",
-      groupName: "Group Delta",
+      name: "Group Delta",
       image: "https://via.placeholder.com/50",
     },
     {
       _id: "5",
-      groupName: "Group Epsilon",
+      name: "Group Epsilon",
       image: "https://via.placeholder.com/50",
     },
   ];
 
   // Function to truncate long group names
-  const truncateGroupName = (groupName) => {
-    return groupName.length > 10 ? `${groupName.slice(0, 10)}...` : groupName;
+  const truncatename = (name) => {
+    return name.length > 10 ? `${name.slice(0, 10)}...` : name;
   };
 
   // Handle group click
@@ -74,7 +74,7 @@ const GroupsList = () => {
             <ContactGroupCard
               key={group._id}
               image={group.image}
-              name={truncateGroupName(group.groupName)}
+              name={truncatename(group.name)}
               onClick={() => handleGroupClick(group)} // Pass group to the click handler
             />
           ))}

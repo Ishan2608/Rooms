@@ -1,14 +1,9 @@
-import React, { useState } from "react";
-import {
-  Avatar,
-  IconButton,
-  Menu,
-  MenuItem,
-  Typography,
-  Tooltip,
-} from "@mui/material";
+import React from "react";
+import { Avatar, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
+import { useChatContext } from "../../context/ChatContext";
 
 // Styled components
 const HeaderContainer = styled("div")({
@@ -24,8 +19,21 @@ const StyledAvatar = styled(Avatar)({
   marginRight: "10px",
 });
 
-const ChatsHeader = ({ name, image }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
+const ChatsHeader = () => {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { selectedContact, selectedGroup, selectContact, selectGroup } =
+    useChatContext();
+  const displayName = selectedContact
+    ? selectedContact.name
+    : selectedGroup
+    ? selectedGroup.name
+    : "Select a User";
+
+  const displayImage = selectedContact
+    ? selectedContact.image
+    : selectedGroup
+    ? selectedGroup.image
+    : null;
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -35,17 +43,27 @@ const ChatsHeader = ({ name, image }) => {
     setAnchorEl(null);
   };
 
+  const handleUnselect = () => {
+    selectContact(null); // Clear selected contact
+    selectGroup(null); // Clear selected group
+  };
+
   const handleDeleteContact = () => {
-    // Handle delete contact action here
     console.log("Delete Contact clicked");
     handleMenuClose();
   };
 
   return (
     <HeaderContainer>
-      <StyledAvatar src={image} alt={name} />
+      <IconButton
+        onClick={handleUnselect}
+        style={{ color: "#fff", marginRight: "10px" }}
+      >
+        <CloseIcon />
+      </IconButton>
+      <StyledAvatar src={displayImage} alt={displayName} />
       <Typography variant="h6" noWrap>
-        Name of Contact
+        {displayName}
       </Typography>
       <div style={{ flexGrow: 1 }} />
       <IconButton onClick={handleMenuClick} style={{ color: "#fff" }}>
@@ -62,9 +80,7 @@ const ChatsHeader = ({ name, image }) => {
           },
         }}
       >
-        <MenuItem onClick={handleDeleteContact} >
-          Delete Contact
-        </MenuItem>
+        <MenuItem onClick={handleDeleteContact}>Delete Contact</MenuItem>
       </Menu>
     </HeaderContainer>
   );

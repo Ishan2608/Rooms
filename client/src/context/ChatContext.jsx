@@ -43,8 +43,9 @@ const ChatProvider = ({ children }) => {
   const fetchChatMessages = useCallback(async (chatEntity) => {
     try {
       // Replace with actual API call or logic to fetch chat messages
-      const response = await fetch(`/api/messages/${chatEntity.id}`);
-      const messages = await response.json();
+      // const response = await fetch(`/api/messages/${chatEntity.id}`);
+      // const messages = await response.json();
+      const messages = [];
       setCurrentMessages(messages);
     } catch (error) {
       console.error("Error fetching chat messages:", error);
