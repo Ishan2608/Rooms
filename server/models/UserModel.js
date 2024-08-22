@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt"
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -27,7 +26,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
     default: ""
-  }
+  },
+  contacts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users"
+  }],
 });
 
 const User = mongoose.model("Users", userSchema);

@@ -4,7 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authRoutes from "./routes/AuthRoutes.js";
-import multer from "multer";
+import chatRoutes from "./routes/ChatRoutes.js"
 
 // get values to be used globally
 dotenv.config();
@@ -24,6 +24,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/chats', chatRoutes);
 
 // start the server to listen to requests
 const server = app.listen(port, ()=>{

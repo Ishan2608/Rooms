@@ -1,92 +1,124 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
   Box,
+  TextField,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ContactGroupCard from "./ContactGroupCard"; // Ensure the path is correct
+import SendIcon from "@mui/icons-material/Send";
+import axios from "axios";
 import { useChatContext } from "../../context/ChatContext";
 
-const ContactsList = () => {
+const SearchContacts = ({ onClose }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [contacts, setContacts] = useState([]);
+  const [filteredContacts, setFilteredContacts] = useState([]);
+  const { selectContact } = useChatContext();
 
-  const {selectContact} = useChatContext();
+  // Fetch all users when the component mounts
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("/api/chat/users", {
+          withCredentials: true, // Include cookies (JWT token)
+        });
+        setContacts(response.data);
+        setFilteredContacts(response.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    fetchUsers();
+  }, []);
 
-  // Dummy data for contacts
-  const contacts = [
-    { _id: "1", name: "JohnDoe", image: "https://via.placeholder.com/50" },
-    {
-      _id: "2",
-      name: "JaneSmith",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      _id: "3",
-      name: "AlexanderTheGreat",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      _id: "4",
-      name: "EmilyJohnson",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      _id: "5",
-      name: "ChrisBrown",
-      image: "https://via.placeholder.com/50",
-    },
-  ];
-
-  // Function to truncate long usernames
-  const truncateUsername = (name) => {
-    return name.length > 10 ? `${name.slice(0, 10)}...` : name;
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    setFilteredContacts(
+      contacts.filter((contact) =>
+        contact.username.toLowerCase().includes(term)
+      )
+    );
   };
 
-  // Handle contact click
-  const handleContactClick = (id, name, image) => {
-    console.log(`Clicked contact ID: ${id}, Name: ${name}`);
+  // Handle send button click
+  const handleSendClick = async (contact) => {
+    try {
+      // Add the selected user to the current user's contacts
+      await axios.post(
+        "/api/chat/contact",
+        { contactId: contact._id },
+        { withCredentials: true } // Include cookies (JWT token)
+      );
 
-    // Update the global state with the selected contact
-    selectContact({ id, name, image });
+      // Update the selected contact in global state
+      selectContact(contact);
+
+      // Close the modal
+      onClose();
+    } catch (error) {
+      console.error("Error adding contact:", error);
+    }
   };
+
   return (
-    <Accordion
-      defaultExpanded={false}
+    <Box
       sx={{
-        backgroundColor: "#333",
+        padding: "20px",
+        backgroundColor: "#424242",
         color: "#fff",
-        marginBottom: "10px",
-        boxShadow: "none",
-        border: "none",
+        height: "100%",
+        maxHeight: "calc(100vh - 40px)",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: "#fff" }} />}
-        aria-controls="contacts-content"
-        id="contacts-header"
-      >
-        <Typography variant="h6">Contacts</Typography>
-      </AccordionSummary>
-      <AccordionDetails
+      {/* Header with search input */}
+      <Box sx={{ marginBottom: "20px" }}>
+        <Typography variant="h6">Search for Contacts</Typography>
+        <TextField
+          variant="outlined"
+          size="small"
+          label="Search"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          sx={{ marginTop: "10px", width: "100%" }}
+        />
+      </Box>
+
+      {/* Contacts list */}
+      <Box
         sx={{
-          maxHeight: "calc(100vh - 150px)", // Adjust based on header size and footer (if any)
+          flex: 1,
+          overflowY: "auto",
         }}
       >
-        <Box>
-          {contacts.map((contact) => (
-            <ContactGroupCard
-              key={contact._id}
-              image={contact.image}
-              name={truncateUsername(contact.name)}
-              onClick={() => handleContactClick(contact._id, contact.name, contact.image)}
-            />
+        <List>
+          {filteredContacts.map((contact) => (
+            <ListItem key={contact._id} sx={{ padding: "10px 0" }}>
+              <ListItemText
+                primary={contact.username}
+                secondary={`${contact.firstName} ${contact.lastName}`}
+              />
+              <IconButton
+                onClick={() => handleSendClick(contact)}
+                sx={{
+                  color: "#007bff",
+                  "&:hover": { color: "#0056b3" },
+                }}
+              >
+                <SendIcon />
+              </IconButton>
+            </ListItem>
           ))}
-        </Box>
-      </AccordionDetails>
-    </Accordion>
+        </List>
+      </Box>
+    </Box>
   );
 };
 
-export default ContactsList;
+export default SearchContacts;

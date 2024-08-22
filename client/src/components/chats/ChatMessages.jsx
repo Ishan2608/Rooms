@@ -7,8 +7,6 @@ const ChatMessages = () => {
 
   const { currentMessages } = useChatContext();
   const hasMessages = currentMessages && currentMessages.length > 0;
-
-
   return (
     <div
       style={{

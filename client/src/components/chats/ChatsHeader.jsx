@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Avatar, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CloseIcon from "@mui/icons-material/Close";
@@ -20,20 +20,21 @@ const StyledAvatar = styled(Avatar)({
   marginRight: "10px",
 });
 
-const DeleteMenuItem = styled(MenuItem)({
-  color: "#DC143C", // Red color
-});
-
 const ChatsHeader = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
   const { selectedContact, selectedGroup, selectContact, selectGroup } =
     useChatContext();
+
   const displayName = selectedContact
-    ? selectedContact.name
+    ? selectedContact.username
     : selectedGroup
     ? selectedGroup.name
     : "Select a User";
+
+  const displaySubName = selectedContact
+    ? `${selectedContact.firstName} ${selectedContact.lastName}`
+    : null;
 
   const displayImage = selectedContact
     ? selectedContact.image
@@ -59,13 +60,13 @@ const ChatsHeader = () => {
     handleMenuClose();
   };
 
+  const handleCloseGroupInfo = () => {
+    setGroupInfoOpen(false);
+  };
+
   const handleDeleteContact = () => {
     console.log("Delete Contact clicked");
     handleMenuClose();
-  };
-
-  const handleCloseGroupInfo = () => {
-    setGroupInfoOpen(false);
   };
 
   return (
@@ -78,9 +79,16 @@ const ChatsHeader = () => {
           <CloseIcon />
         </IconButton>
         <StyledAvatar src={displayImage} alt={displayName} />
-        <Typography variant="h6" noWrap>
-          {displayName}
-        </Typography>
+        <div>
+          <Typography variant="h6" noWrap>
+            {displayName}
+          </Typography>
+          {displaySubName && (
+            <Typography variant="subtitle2" noWrap sx={{ color: "#B0B0B0" }}>
+              {displaySubName}
+            </Typography>
+          )}
+        </div>
         <div style={{ flexGrow: 1 }} />
         <IconButton onClick={handleMenuClick} style={{ color: "#fff" }}>
           <MoreVertIcon />
@@ -99,9 +107,9 @@ const ChatsHeader = () => {
           {selectedGroup && !selectedContact ? (
             <MenuItem onClick={handleViewGroupInfo}>View Group Info</MenuItem>
           ) : selectedContact ? (
-            <DeleteMenuItem onClick={handleDeleteContact}>
+            <MenuItem onClick={handleDeleteContact} sx={{ color: "red" }}>
               Delete Contact
-            </DeleteMenuItem>
+            </MenuItem>
           ) : null}
         </Menu>
       </HeaderContainer>
