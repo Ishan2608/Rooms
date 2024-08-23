@@ -68,6 +68,34 @@ export const getContacts = async (req, res) => {
   }
 };
 
+// Function to delete a contact
+export const deleteContact = async (req, res) => {
+  try {
+    const { contactId } = req.params;
+    const userId = req.userId;
+
+    // Find the user and remove the contact from their contact list
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Remove contact from the user's contact list
+    user.contacts = user.contacts.filter(contact => contact.toString() !== contactId);
+    await user.save();
+
+    // Find the contact user and remove the user from their contact list
+    const contactUser = await User.findById(contactId);
+    if (contactUser) {
+      contactUser.contacts = contactUser.contacts.filter(contact => contact.toString() !== userId);
+      await contactUser.save();
+    }
+
+    res.status(200).json({ message: 'Contact deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting contact:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 // Fetch messages for a specific user-user chat
 export const fetchUserChatMessages = async (req, res) => {
   try {

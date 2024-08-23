@@ -23,7 +23,8 @@ const ContactsList = () => {
         const response = await axios.get(CHAT_ROUTES.GET_ALL_CONTACTS, {
           withCredentials: true,
         });
-        console.log("Fetched Contacts:", response.data); // Debugging
+        // Debugging
+        // console.log("Fetched Contacts:", response.data); 
         updateContacts(response.data); // Use the context method
         setLoading(false);
       } catch (error) {
@@ -44,8 +45,6 @@ const ContactsList = () => {
     const fullName = `${firstName} ${lastName}`;
     return fullName.length > 15 ? `${fullName.slice(0, 15)}...` : fullName;
   };
-
-  console.log(typeof(contacts));
 
   return (
     <Accordion

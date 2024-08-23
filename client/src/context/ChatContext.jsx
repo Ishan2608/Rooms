@@ -61,6 +61,7 @@ const ChatProvider = ({ children }) => {
         groups,
         selectedGroup,
         currentMessages,
+        setContacts,
         selectContact,
         selectGroup,
         updateContacts,

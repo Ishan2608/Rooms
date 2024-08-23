@@ -20,15 +20,15 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   marginRight: "10px",
 }));
 
-const GroupCard = ({ groupName, image, onClick }) => {
+const GroupCard = ({ name, image, onClick }) => {
   return (
     <StyledCard onClick={onClick}>
-      <Tooltip title={groupName}>
-        <StyledAvatar src={image} alt={groupName} />
+      <Tooltip title={name}>
+        <StyledAvatar src={image} alt={name} />
       </Tooltip>
       <CardContent>
         <Typography variant="body1" noWrap>
-          {groupName}
+          {name}
         </Typography>
       </CardContent>
     </StyledCard>

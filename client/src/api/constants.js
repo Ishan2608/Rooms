@@ -20,6 +20,7 @@ export const CHAT_ROUTES = {
   GET_ALL_USERS: `${CHAT_ROOT}/users`,
   ADD_TO_CONTACT: `${CHAT_ROOT}/contact`,
   GET_ALL_CONTACTS: `${CHAT_ROOT}/contacts`,
+  DELETE_A_CONTACT: `${CHAT_ROOT}/contacts/:contactId`,
   FETCH_USER_CHAT_MESSAGES: `${CHAT_ROOT}/messages/user/:userId`,
   FETCH_GROUP_CHAT_MESSAGES: `${CHAT_ROOT}/messages/group/:groupId`,
   SEND_MESSAGE: `${CHAT_ROOT}/message`,

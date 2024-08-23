@@ -13,26 +13,17 @@ import {
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-
-// Dummy data for contacts
-const contacts = [
-  { _id: "1", username: "JohnDoe" },
-  { _id: "2", username: "JaneSmith" },
-  { _id: "3", username: "AlexanderTheGreat" },
-  { _id: "4", username: "EmilyJohnson" },
-  { _id: "5", username: "ChrisBrown" },
-  { _id: "6", username: "User 6" },
-  { _id: "7", username: "User 7" },
-  { _id: "8", username: "User 8" },
-  { _id: "9", username: "User 9" },
-  { _id: "10", username: "User 10" },
-  // Add more items if needed
-];
+import { useChatContext } from "../../context/ChatContext"; // Assuming this is where your global state is managed
+import { CHAT_ROUTES } from "../../api/constants";
+import axios from "axios";
 
 const FormGroup = ({ onClose }) => {
+  const { contacts, updateGroups, selectContact, selectGroup } =
+    useChatContext();
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedContacts, setSelectedContacts] = useState({});
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   // Handle checkbox change
   const handleCheckboxChange = (contactId) => {
@@ -43,20 +34,58 @@ const FormGroup = ({ onClose }) => {
   };
 
   // Handle form submission
-  const handleSubmit = () => {
-    console.log("Group Title:", groupTitle);
-    console.log(
-      "Selected Contacts:",
-      Object.keys(selectedContacts).filter((id) => selectedContacts[id])
-    );
-    setOpenSnackbar(true);
-    onClose();
-    // Automatically close the modal when the toast appears
-    // setTimeout(() => {
-    //   onClose();
-    // }, 600); 
-    // Adjust timing if necessary
+  const handleSubmit = async () => {
+    if (!groupTitle) {
+      setSnackbarMessage("Group title is required!");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    if (Object.keys(selectedContacts).length === 0) {
+      setSnackbarMessage("At least one contact must be selected!");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      // Prepare the data for group creation
+      const selectedContactIds = Object.keys(selectedContacts).filter(
+        (id) => selectedContacts[id]
+      );
+      const response = await axios.post(
+        CHAT_ROUTES.CREATE_NEW_GROUP,
+        { name: groupTitle, members: selectedContactIds },
+        { withCredentials: true }
+      );
+
+      if (response.status === 201) {
+        console.log("Group created successfully:", response.data);
+
+        // Assuming response.data contains the newly created group
+        const newGroup = response.data; // Adjust this line based on actual response structure
+
+        // Optionally, fetch the updated list of groups if necessary
+        // await fetchGroups();
+
+        // Update the global state to include the new group
+        updateGroups((prevGroups) => [...prevGroups, newGroup]);
+
+        // Set the newly created group as selected
+        selectGroup(newGroup);
+
+        onClose(); // Close the modal
+      } else {
+        console.error("Failed to create group. Status code:", response.status);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("Error creating group:", error.response.data);
+      } else {
+        console.error("Error creating group:", error.message);
+      }
+    }
   };
+
 
   // Close Snackbar
   const handleCloseSnackbar = () => {
@@ -140,12 +169,12 @@ const FormGroup = ({ onClose }) => {
         </List>
       </Box>
 
-      {/* Snackbar for success message */}
+      {/* Snackbar for success or error message */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        message="Group created successfully!"
+        message={snackbarMessage}
         action={
           <IconButton
             size="small"
@@ -156,7 +185,12 @@ const FormGroup = ({ onClose }) => {
             <CloseIcon fontSize="small" />
           </IconButton>
         }
-        sx={{ position: "absolute", top: 20, right: 20 }} // Adjust position to top right
+        sx={{
+          position: "absolute",
+          top: 20,
+          right: "50%",
+          transform: "translateX(50%)",
+        }} // Center horizontally
       />
     </Box>
   );

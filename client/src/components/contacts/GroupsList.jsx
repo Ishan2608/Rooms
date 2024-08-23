@@ -9,12 +9,16 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import GroupCard from "./GroupCard";
 import { useChatContext } from "../../context/ChatContext"; // Import useChatContext
-
 import axios from "axios";
 import { CHAT_ROUTES } from "../../api/constants";
 
 const GroupsList = () => {
-  const { selectGroup, groups, updateGroups, selectedGroup } = useChatContext(); // Access selectGroup and state from context
+  const {
+    selectGroup,
+    groups = [],
+    updateGroups,
+    selectedGroup,
+  } = useChatContext(); // Default groups to empty array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -25,7 +29,7 @@ const GroupsList = () => {
         const response = await axios.get(CHAT_ROUTES.GET_ALL_GROUPS, {
           withCredentials: true, // Include cookies with the request
         });
-        updateGroups(response.data); // Update global state with fetched groups
+        updateGroups(response.data || []); // Ensure groups is an array
         setLoading(false);
       } catch (error) {
         console.error("Error fetching groups:", error);

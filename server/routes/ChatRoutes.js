@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/AuthMiddleware.js";
 import {
-  getAllUsers, addContact, getContacts,
+  getAllUsers, addContact, getContacts, deleteContact,
   fetchUserChatMessages, fetchGroupChatMessages, sendMessage,
   createGroup, getGroups, fetchGroupInfo, updateGroupInfo, leaveGroup, deleteGroup
 } from "../controllers/ChatController.js";
@@ -17,6 +17,9 @@ routes.post("/contact", verifyToken, addContact);
 
 // Fetch all contacts for the current user
 routes.get("/contacts", verifyToken, getContacts);
+
+// delete a contact
+routes.delete("/contacts/:contactId", verifyToken, deleteContact);
 
 // Fetch messages for a specific user-user chat
 routes.get("/messages/user/:userId", verifyToken, fetchUserChatMessages);

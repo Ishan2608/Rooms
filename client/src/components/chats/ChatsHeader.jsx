@@ -5,6 +5,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import { useChatContext } from "../../context/ChatContext";
 import GroupInfo from "./GroupInfo";
+import { CHAT_ROUTES } from "../../api/constants";
+import axios from "axios";
 
 // Styled components
 const HeaderContainer = styled("div")({
@@ -23,7 +25,7 @@ const StyledAvatar = styled(Avatar)({
 const ChatsHeader = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
-  const { selectedContact, selectedGroup, selectContact, selectGroup } = useChatContext();
+  const { selectedContact, selectedGroup, selectContact, setContacts, selectGroup } = useChatContext();
 
   const displayName = selectedContact
     ? selectedContact.username
@@ -63,10 +65,52 @@ const ChatsHeader = () => {
     setGroupInfoOpen(false);
   };
 
-  const handleDeleteContact = () => {
-    console.log("Delete Contact clicked");
-    handleMenuClose();
+  const handleDeleteContact = async () => {
+    try {
+      if (!selectedContact) return;
+
+      // Prepare URL with contactId
+      const url = CHAT_ROUTES.DELETE_A_CONTACT.replace(
+        ":contactId",
+        selectedContact._id
+      );
+
+      // Make API request to delete the contact
+      const response = await axios.delete(url, { withCredentials: true });
+
+      // Check if the response status is OK
+      if (response.status === 200) {
+        console.log("Contact deleted successfully:", response.data);
+
+        // Fetch the updated contact list
+        const updatedContactsResponse = await axios.get(
+          CHAT_ROUTES.GET_ALL_CONTACTS,
+          {
+            withCredentials: true,
+          }
+        );
+
+        // Update local state to reflect the contact deletion
+        setContacts(updatedContactsResponse.data);
+
+        // Clear the selected contact
+        selectContact(null);
+      } else {
+        console.error(
+          "Failed to delete contact. Status code:",
+          response.status
+        );
+      }
+    } catch (error) {
+      // Log the error
+      console.error("Error deleting contact:", error);
+    } finally {
+      // Close the menu regardless of success or failure
+      handleMenuClose();
+    }
   };
+
+
 
   return (
     <>
