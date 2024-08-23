@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -9,41 +9,35 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactGroupCard from "./ContactGroupCard"; // Ensure the path is correct
 import { useChatContext } from "../../context/ChatContext"; // Import useChatContext
+import axios from "axios";
+import { CHAT_ROUTES } from "../../api/constants";
 
 const GroupsList = () => {
-  const { selectGroup } = useChatContext(); // Access selectGroup from context
+  const { selectGroup, groups, updateGroups, selectedGroup } = useChatContext(); // Access selectGroup and state from context
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Dummy data for groups
-  const groups = [
-    {
-      _id: "1",
-      name: "Group Alpha",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      _id: "2",
-      name: "Group Beta",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      _id: "3",
-      name: "Group Gamma",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      _id: "4",
-      name: "Group Delta",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      _id: "5",
-      name: "Group Epsilon",
-      image: "https://via.placeholder.com/50",
-    },
-  ];
+  useEffect(() => {
+    // Fetch groups from the API
+    const fetchGroups = async () => {
+      try {
+        const response = await axios.get(CHAT_ROUTES.GET_ALL_GROUPS, {
+          withCredentials: true, // Include cookies with the request
+        });
+        updateGroups(response.data); // Update global state with fetched groups
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching groups:", error);
+        setError("Failed to load groups");
+        setLoading(false);
+      }
+    };
+
+    fetchGroups();
+  }, [updateGroups]);
 
   // Function to truncate long group names
-  const truncatename = (name) => {
+  const truncateName = (name) => {
     return name.length > 10 ? `${name.slice(0, 10)}...` : name;
   };
 
@@ -70,14 +64,24 @@ const GroupsList = () => {
         }}
       >
         <Box>
-          {groups.map((group) => (
-            <ContactGroupCard
-              key={group._id}
-              image={group.image}
-              name={truncatename(group.name)}
-              onClick={() => handleGroupClick(group)} // Pass group to the click handler
-            />
-          ))}
+          {loading ? (
+            <Typography>Loading groups...</Typography>
+          ) : error ? (
+            <Typography>{error}</Typography>
+          ) : (
+            groups.map((group) => (
+              <ContactGroupCard
+                key={group._id}
+                image={group.image}
+                name={truncateName(group.name)}
+                onClick={() => handleGroupClick(group)} // Pass group to the click handler
+                sx={{
+                  backgroundColor:
+                    selectedGroup?._id === group._id ? "#555" : "transparent",
+                }} // Highlight selected group
+              />
+            ))
+          )}
         </Box>
       </AccordionDetails>
     </Accordion>

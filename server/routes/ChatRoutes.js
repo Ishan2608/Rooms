@@ -2,8 +2,7 @@ import { Router } from "express";
 import { verifyToken } from "../middlewares/AuthMiddleware.js";
 import {
   getAllUsers, addContact, getContacts,
-  fetchUserChatMessages, fetchGroupChatMessages,
-  sendMessage,
+  fetchUserChatMessages, fetchGroupChatMessages, sendMessage,
   createGroup, getGroups, fetchGroupInfo, updateGroupInfo, leaveGroup, deleteGroup
 } from "../controllers/ChatController.js";
 
@@ -26,7 +25,8 @@ routes.get("/messages/user/:userId", verifyToken, fetchUserChatMessages);
 routes.get("/messages/group/:groupId", verifyToken, fetchGroupChatMessages);
 
 // Send a message (text or file) to a contact or group
-routes.post("/message", verifyToken, fileUpload.single("file"), sendMessage);
+// routes.post("/message", verifyToken, fileUpload.single("file"), sendMessage);
+routes.post("/message", verifyToken, sendMessage);
 
 // Create a new group
 routes.post("/group", verifyToken, createGroup);

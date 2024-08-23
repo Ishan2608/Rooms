@@ -19,15 +19,18 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   marginRight: "10px",
 }));
 
-const ContactGroupCard = ({ name, image, onClick }) => {
+const ContactGroupCard = ({ username, fullName, image, onClick }) => {
   return (
     <StyledCard onClick={onClick}>
-      <Tooltip title={name}>
-        <StyledAvatar src={image} alt={name} />
+      <Tooltip title={username}>
+        <StyledAvatar src={image} alt={username} />
       </Tooltip>
       <CardContent>
         <Typography variant="body1" noWrap>
-          {name}
+          {username}
+        </Typography>
+        <Typography variant="body2" color="textSecondary" noWrap>
+          {fullName}
         </Typography>
       </CardContent>
     </StyledCard>

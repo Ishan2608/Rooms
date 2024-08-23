@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -9,41 +9,72 @@ import {
   IconButton,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-
-const dummyContacts = [
-  { _id: "1", username: "JohnDoe" },
-  { _id: "2", username: "JaneSmith" },
-  { _id: "3", username: "AlexanderTheGreat" },
-  { _id: "4", username: "EmilyJohnson" },
-  { _id: "5", username: "ChrisBrown" },
-  { _id: "6", username: "User 6" },
-  { _id: "7", username: "User 7" },
-  { _id: "7", username: "User 7" },
-  { _id: "7", username: "User 7" },
-  { _id: "7", username: "User 7" },
-  { _id: "7", username: "User 7" },
-  // Add more dummy contacts if needed
-];
+import { useChatContext } from "../context/ChatContext"; // Adjust the import path if necessary
+import { CHAT_ROUTES } from "../../api/constants";
+import axios from "axios";
 
 const SearchContacts = ({ onClose }) => {
+  const { updateContacts, selectContact } = useChatContext();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredContacts, setFilteredContacts] = useState(dummyContacts);
+  const [filteredContacts, setFilteredContacts] = useState([]);
+
+  useEffect(() => {
+    // Fetch all available users from the backend
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(CHAT_ROUTES.GET_ALL_USERS, {
+          withCredentials: true, // Include cookies with the request
+        });
+        setFilteredContacts(response.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   // Handle search input change
   const handleSearchChange = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
     setFilteredContacts(
-      dummyContacts.filter((contact) =>
-        contact.username.toLowerCase().includes(term)
+      filteredContacts.filter(
+        (contact) =>
+          contact.username.toLowerCase().includes(term) ||
+          `${contact.firstName} ${contact.lastName}`
+            .toLowerCase()
+            .includes(term)
       )
     );
   };
 
   // Handle send button click
-  const handleSendClick = (contactId) => {
-    console.log("Send message to contact ID:", contactId);
-    onClose(); // Close the modal
+  const handleSendClick = async (contactId) => {
+    try {
+      // Add the selected contact to the user's contact list
+      await axios.post(
+        "/api/chats/contact",
+        { contactId },
+        { withCredentials: true } // Include cookies with the request
+      );
+
+      // Fetch the updated contact list
+      const response = await axios.get(CHAT_ROUTES.ADD_TO_CONTACT, {
+        withCredentials: true, // Include cookies with the request
+      });
+      updateContacts(response.data);
+
+      // Select the newly added contact
+      const newContact = filteredContacts.find(
+        (contact) => contact._id === contactId
+      );
+      selectContact(newContact);
+
+      onClose(); // Close the modal
+    } catch (error) {
+      console.error("Error adding contact:", error);
+    }
   };
 
   return (
@@ -81,7 +112,16 @@ const SearchContacts = ({ onClose }) => {
         <List>
           {filteredContacts.map((contact) => (
             <ListItem key={contact._id} sx={{ padding: "10px 0" }}>
-              <ListItemText primary={contact.username} />
+              <ListItemText
+                primary={contact.username} // Show the username as the main text
+                secondary={`${contact.firstName} ${contact.lastName}`} // Show the full name as a light subheading
+                secondaryTypographyProps={{
+                  sx: {
+                    color: "#b0b0b0", // Light grey color for subheading
+                    fontSize: "0.875rem", // Adjust font size as needed
+                  },
+                }}
+              />
               <IconButton
                 onClick={() => handleSendClick(contact._id)}
                 sx={{
