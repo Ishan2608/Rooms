@@ -9,7 +9,7 @@ import {
   IconButton,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import { useChatContext } from "../context/ChatContext"; // Adjust the import path if necessary
+import { useChatContext } from "../../context/ChatContext";
 import { CHAT_ROUTES } from "../../api/constants";
 import axios from "axios";
 
@@ -54,14 +54,14 @@ const SearchContacts = ({ onClose }) => {
     try {
       // Add the selected contact to the user's contact list
       await axios.post(
-        "/api/chats/contact",
-        { contactId },
-        { withCredentials: true } // Include cookies with the request
+        CHAT_ROUTES.ADD_TO_CONTACT,
+        { contactId: String(contactId) }, // Ensuring contactId is a string
+        { withCredentials: true }
       );
 
       // Fetch the updated contact list
-      const response = await axios.get(CHAT_ROUTES.ADD_TO_CONTACT, {
-        withCredentials: true, // Include cookies with the request
+      const response = await axios.get(CHAT_ROUTES.GET_ALL_CONTACTS, {
+        withCredentials: true,
       });
       updateContacts(response.data);
 
@@ -73,7 +73,11 @@ const SearchContacts = ({ onClose }) => {
 
       onClose(); // Close the modal
     } catch (error) {
-      console.error("Error adding contact:", error);
+      if (error.response) {
+        console.error("Error adding contact:", error.response.data);
+      } else {
+        console.error("Error adding contact:", error.message);
+      }
     }
   };
 

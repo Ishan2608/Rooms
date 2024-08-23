@@ -19,7 +19,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   marginRight: "10px",
 }));
 
-const ContactGroupCard = ({ username, fullName, image, onClick }) => {
+const ContactCard = ({ username, fullName, image, onClick }) => {
   return (
     <StyledCard onClick={onClick}>
       <Tooltip title={username}>
@@ -37,4 +37,4 @@ const ContactGroupCard = ({ username, fullName, image, onClick }) => {
   );
 };
 
-export default ContactGroupCard;
+export default ContactCard;

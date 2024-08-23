@@ -34,11 +34,11 @@ const App = () => {
             <Route path="/auth" element={<Auth />} />
             <Route
               path="/chat"
-              // element={<ProtectedRoute element={<Chat />} />}
-              element={
-                <ChatProvider>
-                  <Chat/>
-                </ChatProvider>
+              element={<ProtectedRoute element={
+                  <ChatProvider>
+                    <Chat/>
+                  </ChatProvider>
+                } />
               }
             />
             <Route

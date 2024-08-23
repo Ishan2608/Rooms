@@ -21,7 +21,6 @@ export const getAllUsers = async (req, res) => {
 // Add a contact to the user's contact list
 export const addContact = async (req, res) => {
   const { contactId } = req.body;
-
   try {
     // Ensure the contactId is provided
     if (!contactId) {

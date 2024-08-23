@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   IconButton,
@@ -9,24 +9,16 @@ import {
   Box,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { useChatContext } from "../../context/ChatContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import SearchContacts from "./SearchContacts"; // Import the SearchContacts modal
 import FormGroup from "./FormGroup"; // Import the FormGroup modal
 
 const ContactsHeader = () => {
-  const { isAuthenticated, user } = useAuthContext();
+  const { user } = useAuthContext();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [openModal, setOpenModal] = useState(null);
-
-  // Redirect if the user is not authenticated
-  // React.useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     navigate("/auth");
-  //   }
-  // }, [isAuthenticated, navigate, user]);
 
   const handleProfileClick = () => {
     navigate("/profile");
@@ -63,8 +55,8 @@ const ContactsHeader = () => {
       }}
     >
       <Avatar
-        src={user?.profileImage || ""}
-        alt={user?.name || "User"}
+        src={user?.image || ""}
+        alt={user?.username || "User"}
         onClick={handleProfileClick}
         style={{ cursor: "pointer" }}
       />
@@ -79,7 +71,7 @@ const ContactsHeader = () => {
           whiteSpace: "nowrap",
         }}
       >
-        {user?.name || "User"}
+        {user?.username || "User"}
       </Typography>
       <IconButton onClick={handleMenuClick} style={{ color: "#fff" }}>
         <MoreVertIcon />

@@ -7,13 +7,13 @@ import {
   Box,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ContactGroupCard from "./ContactGroupCard";
+import ContactCard from "./ContactCard";
 import { useChatContext } from "../../context/ChatContext";
 import axios from "axios";
 import { CHAT_ROUTES } from "../../api/constants";
 
 const ContactsList = () => {
-  const { selectContact, contacts, setContacts } = useChatContext(); // Access global state
+  const { selectContact, contacts, setContacts, updateContacts } = useChatContext(); // Access global state
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,11 +23,11 @@ const ContactsList = () => {
         const response = await axios.get(CHAT_ROUTES.GET_ALL_CONTACTS, {
           withCredentials: true,
         });
-        setContacts(response.data);
+        console.log("Fetched Contacts:", response.data); // Debugging
+        updateContacts(response.data); // Use the context method
         setLoading(false);
       } catch (error) {
         console.error("Error fetching contacts:", error);
-        setLoading(false);
       }
     };
 
@@ -44,6 +44,8 @@ const ContactsList = () => {
     const fullName = `${firstName} ${lastName}`;
     return fullName.length > 15 ? `${fullName.slice(0, 15)}...` : fullName;
   };
+
+  console.log(typeof(contacts));
 
   return (
     <Accordion
@@ -69,16 +71,13 @@ const ContactsList = () => {
             <Typography variant="body1">No contacts found.</Typography>
           ) : (
             contacts.map((contact) => (
-              <ContactGroupCard
+              <ContactCard
                 key={contact._id}
                 image={contact.image}
-                name={contact.username}
-                onClick={() => handleContactClick(contact)} // Pass contact to the click handler
-              >
-                <Typography variant="body2" color="textSecondary">
-                  {truncateFullName(contact.firstName, contact.lastName)}
-                </Typography>
-              </ContactGroupCard>
+                username={contact.username} // Pass 'username'
+                fullName={truncateFullName(contact.firstName, contact.lastName)} // Pass 'fullName'
+                onClick={() => handleContactClick(contact)}
+              />
             ))
           )}
         </Box>

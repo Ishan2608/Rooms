@@ -4,9 +4,6 @@ export const HOST = "http://localhost:8747";
 // Define the root auth route
 export const AUTH_ROOT = `${HOST}/api/auth`;
 
-// root route for chats
-export const CHAT_ROOT = `${HOST}/api/chats`;
-
 // Export the API routes object for auth
 export const API_ROUTES = {
   SIGN_UP: `${AUTH_ROOT}/sign-up`,
@@ -14,6 +11,9 @@ export const API_ROUTES = {
   GET_PROFILE: `${AUTH_ROOT}/profile`,
   UPDATE_PROFILE: `${AUTH_ROOT}/update-profile`,
 };
+
+// root route for chats
+export const CHAT_ROOT = `${HOST}/api/chats`;
 
 // Export API routes object for chats
 export const CHAT_ROUTES = {

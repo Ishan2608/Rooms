@@ -7,8 +7,9 @@ import {
   Box,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ContactGroupCard from "./ContactGroupCard"; // Ensure the path is correct
+import GroupCard from "./GroupCard";
 import { useChatContext } from "../../context/ChatContext"; // Import useChatContext
+
 import axios from "axios";
 import { CHAT_ROUTES } from "../../api/constants";
 
@@ -70,7 +71,7 @@ const GroupsList = () => {
             <Typography>{error}</Typography>
           ) : (
             groups.map((group) => (
-              <ContactGroupCard
+              <GroupCard
                 key={group._id}
                 image={group.image}
                 name={truncateName(group.name)}

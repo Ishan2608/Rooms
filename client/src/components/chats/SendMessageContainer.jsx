@@ -3,7 +3,7 @@ import { TextField, IconButton, InputAdornment, Paper } from "@mui/material";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
-import EmojiPicker from "emoji-picker-react"; // Ensure this is installed
+import EmojiPicker from "emoji-picker-react";
 
 const SendMessageContainer = () => {
   const [message, setMessage] = useState("");

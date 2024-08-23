@@ -9,8 +9,9 @@ const createToken = (email, userId) => {
 
 export const signup = async (req, res, next) => {
     try{
-      console.log("Request Body:", req.body); // Log fields from req.body
-      console.log("Uploaded File:", req.file); // Log file info from req.file
+      // Log fields from req.body. Log file info from req.file
+      // console.log("Request Body:", req.body);
+      // console.log("Uploaded File:", req.file);
       const { firstName, lastName, username, email, password } = req.body;
       if (!email) {
         return res.status(400).send("Email is missing");
@@ -42,7 +43,7 @@ export const signup = async (req, res, next) => {
         email,
         password: hashedPassword,
       });
-      
+
       // Update image if provided
       if (req.file) {
         const folderPath = `/images/users/${user.id}`;
@@ -77,7 +78,7 @@ export const signup = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
     try{
-        console.log(req.body);
+        // console.log(req.body);
         const {email, password} = req.body;
         if (!email){
             return res.status(400).send("Email is missing");

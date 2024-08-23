@@ -31,7 +31,7 @@ const ChatProvider = ({ children }) => {
     setSelectedContact(null); // Clear selected contact when a group is selected
     fetchChatMessages(group);
   }, []);
-
+  
   const updateContacts = useCallback((newContacts) => {
     setContacts(newContacts);
   }, []);

@@ -23,8 +23,7 @@ const StyledAvatar = styled(Avatar)({
 const ChatsHeader = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
-  const { selectedContact, selectedGroup, selectContact, selectGroup } =
-    useChatContext();
+  const { selectedContact, selectedGroup, selectContact, selectGroup } = useChatContext();
 
   const displayName = selectedContact
     ? selectedContact.username
