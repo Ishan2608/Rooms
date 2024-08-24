@@ -3,6 +3,8 @@ import { Box } from "@mui/material";
 import ContactsHeader from "./ContactsHeader"; // Import the ContactsHeader component
 import ContactsList from "./ContactsList"; // Import the ContactsList component
 import GroupsList from "./GroupsList"; // Import the GroupsList component
+import FromUnknownsList from "./FromUnknownsList";
+import BlockedUsersList from "./BlockedUsersList";
 
 const ContactsContainer = () => {
   return (
@@ -26,6 +28,8 @@ const ContactsContainer = () => {
       >
         <ContactsList />
         <GroupsList />
+        <FromUnknownsList/>
+        <BlockedUsersList/>
       </Box>
     </Box>
   );

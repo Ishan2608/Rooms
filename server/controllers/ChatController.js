@@ -387,3 +387,147 @@ export const deleteGroup = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+// Advanced Functionalities
+
+export const fetchUnknownMessages = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Find the user by ID and populate the unknownMessages field
+    const user = await User.findById(userId)
+      .populate({
+        path: "unknownMessages.user",
+        select: "username firstName lastName",
+      })
+      .populate({
+        path: "unknownMessages.messages",
+        select: "content createdAt",
+      });
+
+    if (!user || !user.unknownMessages.length) {
+      return res.status(404).json({ message: "No unknown messages found" });
+    }
+
+    res.status(200).json(user.unknownMessages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const addUnknownUserToContacts = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const unknownUserId = req.params.userId;
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the unknown user is already in contacts
+    if (user.contacts.includes(unknownUserId)) {
+      return res.status(400).json({ message: "User is already in contacts" });
+    }
+
+    // Add the unknown user to contacts
+    user.contacts.push(unknownUserId);
+
+    // Remove from unknownMessages
+    user.unknownMessages = user.unknownMessages.filter(
+      (message) => message.user.toString() !== unknownUserId
+    );
+
+    await user.save();
+
+    res.status(200).json({ message: "User added to contacts" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const fetchBlockedContacts = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Find the user by ID and populate the blockedContacts field
+    const user = await User.findById(userId).populate(
+      "blockedContacts",
+      "firstName lastName username image"
+    ); // Populate with required fields
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with the list of blocked contacts
+    return res.status(200).json(user.blockedContacts);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error fetching blocked contacts" });
+  }
+};
+
+export const blockUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const blockUserId = req.params.userId;
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Add the user to the blockedContacts list
+    if (!user.blockedContacts.includes(blockUserId)) {
+      user.blockedContacts.push(blockUserId);
+    }
+
+    // Remove the user from contacts if they are in there
+    user.contacts = user.contacts.filter(
+      (contact) => contact.toString() !== blockUserId
+    );
+
+    // Remove any unknown messages from this user
+    user.unknownMessages = user.unknownMessages.filter(
+      (message) => message.user.toString() !== blockUserId
+    );
+
+    await user.save();
+
+    res.status(200).json({ message: "User blocked" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const unblockUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const unblockUserId = req.params.userId;
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Remove the user from the blockedContacts list
+    user.blockedContacts = user.blockedContacts.filter(
+      (blockedUser) => blockedUser.toString() !== unblockUserId
+    );
+
+    await user.save();
+
+    res.status(200).json({ message: "User unblocked" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+

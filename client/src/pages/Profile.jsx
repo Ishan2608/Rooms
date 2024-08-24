@@ -32,12 +32,17 @@ const Profile = () => {
     lastName: user?.lastName || "",
     email: user?.email || "",
     username: user?.username || "",
+    image: user?.image
+      ? `http://localhost:8747${user.image}`
+      : "",
     password: "",
   }));
 
 
+  // console.log(userData.image);
   // State for the profile picture and Snackbar
-  const [profilePic, setProfilePic] = useState(null);
+  const [profilePic, setProfilePic] = useState(userData.image);
+
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarType, setSnackbarType] = useState("success");
 
@@ -275,7 +280,6 @@ const Profile = () => {
             onChange={handleInputChange}
           />
           <div className="flex-row">
-
             <Button variant="contained" color="primary" onClick={handleSave}>
               Save
             </Button>

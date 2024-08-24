@@ -3,7 +3,8 @@ import { verifyToken } from "../middlewares/AuthMiddleware.js";
 import {
   getAllUsers, addContact, getContacts, deleteContact,
   fetchUserChatMessages, fetchGroupChatMessages, sendMessage,
-  createGroup, getGroups, fetchGroupInfo, updateGroupInfo, leaveGroup, deleteGroup
+  createGroup, getGroups, fetchGroupInfo, updateGroupInfo, leaveGroup, deleteGroup,
+  fetchUnknownMessages, addUnknownUserToContacts, blockUser, unblockUser, fetchBlockedContacts
 } from "../controllers/ChatController.js";
 
 
@@ -48,5 +49,24 @@ routes.delete("/group/:groupId", verifyToken, deleteGroup);
 
 // Leave a group (for a non-admin user)
 routes.post("/group/:groupId/leave", verifyToken, leaveGroup);
+
+// ---------------------------------------------------------------
+// Advanced Functionalities
+// ---------------------------------------------------------------
+
+// Fetch all unknown messages (messages from users not in contacts)
+routes.get("/unknown-messages", verifyToken, fetchUnknownMessages);
+
+// Add a user from the unknown messages list to the contact list
+routes.post("/unknown-messages/add-contact/:userId", verifyToken, addUnknownUserToContacts);
+
+// Fetch all blocked contacts
+routes.get("/blocked-contacts", verifyToken, fetchBlockedContacts);
+
+// Block a user (also removes them from contacts if they are there)
+routes.post("/block/:userId", verifyToken, blockUser);
+
+// Unblock a user (optionally re-add them to contacts)
+routes.post("/unblock/:userId", verifyToken, unblockUser);
 
 export default routes;

@@ -12,40 +12,33 @@ import { useChatContext } from "../../context/ChatContext";
 import axios from "axios";
 import { CHAT_ROUTES } from "../../api/constants";
 
-const ContactsList = () => {
+const BlockedUsersList = () => {
   const {
-    selectContact,
-    contacts,
-    setContacts,
-    updateContacts,
+    blockedUsers,
+    updateBlockedUsers,
   } = useChatContext(); // Access global state
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch all contacts of the logged-in user
-    const fetchContacts = async () => {
+
+    const fetchBlockedUsers = async () => {
       try {
-        const response = await axios.get(CHAT_ROUTES.GET_ALL_CONTACTS, {
+        const response = await axios.get(CHAT_ROUTES.FETCH_BLOCKED_CONTACTS, {
           withCredentials: true,
         });
-        updateContacts(response.data);
-        setLoading(false);
+        updateBlockedUsers(response.data);
       } catch (error) {
-        console.error("Error fetching contacts:", error);
+        console.error("Error fetching blocked users:", error);
       }
     };
 
-    fetchContacts();
-  }, [setContacts]);
+    fetchBlockedUsers();
+  }, [updateBlockedUsers]);
 
   const handleContactClick = (contact) => {
     selectContact(contact);
   };
 
-  const truncateFullName = (firstName, lastName) => {
-    const fullName = `${firstName} ${lastName}`;
-    return fullName.length > 15 ? `${fullName.slice(0, 15)}...` : fullName;
-  };
 
   return (
     <>
@@ -55,10 +48,10 @@ const ContactsList = () => {
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: "#fff" }} />}
-          aria-controls="contacts-content"
-          id="contacts-header"
+          aria-controls="blocked-content"
+          id="blocked-header"
         >
-          <Typography variant="h6">Contacts</Typography>
+          <Typography variant="h6">Blocked Users</Typography>
         </AccordionSummary>
         <AccordionDetails
           sx={{
@@ -68,22 +61,18 @@ const ContactsList = () => {
           <Box>
             {loading ? (
               <Typography variant="body1">Loading contacts...</Typography>
-            ) : contacts.length === 0 ? (
-              <Typography variant="body1">No contacts found.</Typography>
-            ) : (
-              contacts.map((contact) => (
+            ): blockedUsers.length === 0 ? (<Typography variant="body1">No blocked users.</Typography>
+            ):(
+              blockedUsers.map((user) => (
                 <ContactCard
-                  key={contact._id}
-                  image={`http://localhost:8747${contact.image}`}
-                  username={contact.username}
-                  fullName={truncateFullName(
-                    contact.firstName,
-                    contact.lastName
-                  )}
-                  onClick={() => handleContactClick(contact)}
+                  key={user._id}
+                  image={user.image}
+                  username={user.username}
+                  onClick={() => handleContactClick(user)}
                 />
               ))
             )}
+            
           </Box>
         </AccordionDetails>
       </Accordion>
@@ -91,4 +80,4 @@ const ContactsList = () => {
   );
 };
 
-export default ContactsList;
+export default BlockedUsersList;

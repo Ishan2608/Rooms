@@ -12,39 +12,32 @@ import { useChatContext } from "../../context/ChatContext";
 import axios from "axios";
 import { CHAT_ROUTES } from "../../api/constants";
 
-const ContactsList = () => {
+const FromUnknownsList = () => {
   const {
-    selectContact,
-    contacts,
-    setContacts,
-    updateContacts,
+    unknownMessages,
+    updateUnknownMessages
   } = useChatContext(); // Access global state
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch all contacts of the logged-in user
-    const fetchContacts = async () => {
+
+    const fetchUnknownMessages = async () => {
       try {
-        const response = await axios.get(CHAT_ROUTES.GET_ALL_CONTACTS, {
+        const response = await axios.get(CHAT_ROUTES.FETCH_UNKNOWN_MESSAGES, {
           withCredentials: true,
         });
-        updateContacts(response.data);
-        setLoading(false);
+        updateUnknownMessages(response.data);
       } catch (error) {
-        console.error("Error fetching contacts:", error);
+        console.error("Error fetching unknown messages:", error);
       }
     };
 
-    fetchContacts();
-  }, [setContacts]);
+    fetchUnknownMessages();
+    
+  }, [updateUnknownMessages]);
 
   const handleContactClick = (contact) => {
     selectContact(contact);
-  };
-
-  const truncateFullName = (firstName, lastName) => {
-    const fullName = `${firstName} ${lastName}`;
-    return fullName.length > 15 ? `${fullName.slice(0, 15)}...` : fullName;
   };
 
   return (
@@ -55,10 +48,10 @@ const ContactsList = () => {
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: "#fff" }} />}
-          aria-controls="contacts-content"
-          id="contacts-header"
+          aria-controls="unknown-content"
+          id="unknown-header"
         >
-          <Typography variant="h6">Contacts</Typography>
+          <Typography variant="h6">From Unknowns</Typography>
         </AccordionSummary>
         <AccordionDetails
           sx={{
@@ -68,19 +61,17 @@ const ContactsList = () => {
           <Box>
             {loading ? (
               <Typography variant="body1">Loading contacts...</Typography>
-            ) : contacts.length === 0 ? (
-              <Typography variant="body1">No contacts found.</Typography>
+            ) : unknownMessages.length === 0 ? (
+              <Typography variant="body1">
+                No messages from unknown users.
+              </Typography>
             ) : (
-              contacts.map((contact) => (
+              unknownMessages.map((message) => (
                 <ContactCard
-                  key={contact._id}
-                  image={`http://localhost:8747${contact.image}`}
-                  username={contact.username}
-                  fullName={truncateFullName(
-                    contact.firstName,
-                    contact.lastName
-                  )}
-                  onClick={() => handleContactClick(contact)}
+                  key={message._id}
+                  image={message.sender.image}
+                  username={message.sender.username}
+                  onClick={() => handleContactClick(message.sender)}
                 />
               ))
             )}
@@ -91,4 +82,4 @@ const ContactsList = () => {
   );
 };
 
-export default ContactsList;
+export default FromUnknownsList;

@@ -10,7 +10,7 @@ import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 // Import Contexts
 import { useAuthContext, AuthProvider } from "./context/AuthContext";
-import { useChatContext, ChatProvider } from "./context/ChatContext";
+import { ChatProvider } from "./context/ChatContext";
 
 const darkTheme = createTheme({
   palette: {

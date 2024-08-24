@@ -55,7 +55,7 @@ const ContactsHeader = () => {
       }}
     >
       <Avatar
-        src={user?.image || ""}
+        src={`http://localhost:8747${user.image}`}
         alt={user?.username || "User"}
         onClick={handleProfileClick}
         style={{ cursor: "pointer" }}
@@ -124,7 +124,7 @@ const ContactsHeader = () => {
             backgroundColor: "#333", // Dark theme modal background
           }}
         >
-          <SearchContacts onClose={handleCloseModal}/>
+          <SearchContacts onClose={handleCloseModal} />
         </Box>
       </Modal>
       {/* Modal for Form Group */}

@@ -19,6 +19,8 @@ const ChatProvider = ({ children }) => {
   const [contacts, setContacts] = useState([]);
   const [groups, setGroups] = useState([]);
   const [currentMessages, setCurrentMessages] = useState([]);
+  const [unknownMessages, setUnknownMessages] = useState([]);
+  const [blockedUsers, setBlockedUsers] = useState([]);
 
   const selectContact = useCallback((contact) => {
     setSelectedContact(contact);
@@ -31,7 +33,7 @@ const ChatProvider = ({ children }) => {
     setSelectedContact(null); // Clear selected contact when a group is selected
     fetchChatMessages(group);
   }, []);
-  
+
   const updateContacts = useCallback((newContacts) => {
     setContacts(newContacts);
   }, []);
@@ -40,11 +42,16 @@ const ChatProvider = ({ children }) => {
     setGroups(newGroups);
   }, []);
 
+  const updateUnknownMessages = useCallback((newUnknownMessages) => {
+    setUnknownMessages(newUnknownMessages);
+  }, []);
+
+  const updateBlockedUsers = useCallback((newBlockedUsers) => {
+    setBlockedUsers(newBlockedUsers);
+  }, []);
+
   const fetchChatMessages = useCallback(async (chatEntity) => {
     try {
-      // Replace with actual API call or logic to fetch chat messages
-      // const response = await fetch(`/api/messages/${chatEntity.id}`);
-      // const messages = await response.json();
       const messages = [];
       setCurrentMessages(messages);
     } catch (error) {
@@ -61,11 +68,16 @@ const ChatProvider = ({ children }) => {
         groups,
         selectedGroup,
         currentMessages,
+        unknownMessages,
+        blockedUsers,
         setContacts,
+        setBlockedUsers,
         selectContact,
         selectGroup,
         updateContacts,
         updateGroups,
+        updateUnknownMessages,
+        updateBlockedUsers,
         setCurrentMessages,
       }}
     >

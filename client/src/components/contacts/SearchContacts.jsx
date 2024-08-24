@@ -7,6 +7,7 @@ import {
   ListItem,
   ListItemText,
   IconButton,
+  Avatar
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { useChatContext } from "../../context/ChatContext";
@@ -116,6 +117,16 @@ const SearchContacts = ({ onClose }) => {
         <List>
           {filteredContacts.map((contact) => (
             <ListItem key={contact._id} sx={{ padding: "10px 0" }}>
+              <Avatar
+                src={`http://localhost:8747${contact.image}`}
+                alt={contact.username}
+                sx={{
+                  marginRight: "10px",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                  borderColor: "white",
+                }}
+              />
               <ListItemText
                 primary={contact.username} // Show the username as the main text
                 secondary={`${contact.firstName} ${contact.lastName}`} // Show the full name as a light subheading

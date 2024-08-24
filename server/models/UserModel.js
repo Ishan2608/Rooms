@@ -25,14 +25,36 @@ const userSchema = new mongoose.Schema({
   image: {
     type: String,
     required: false,
-    default: ""
+    default: "",
   },
-  contacts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Users"
-  }],
+  contacts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+    },
+  ],
+  blockedContacts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+    },
+  ],
+  unknownMessages: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Users",
+        required: true,
+      },
+      messages: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Chats",
+        },
+      ],
+    },
+  ],
 });
 
 const User = mongoose.model("Users", userSchema);
-
 export default User;

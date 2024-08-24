@@ -120,10 +120,10 @@ const SignUpForm = () => {
     if (form.image) {
       data.append("image", form.image); // Attach the image file
     }
-    
-    for (let [key, value] of data.entries()) {
-      console.log(`${key}: ${value}`);
-    }
+    // show submitted form details
+    // for (let [key, value] of data.entries()) {
+    //   console.log(`${key}: ${value}`);
+    // }
     
     try {
       const response = await axios.post(API_ROUTES.SIGN_UP, data, 

@@ -1,29 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IconButton,
   Button,
   Typography,
   Box,
-  List,
-  ListItem,
-  ListItemText,
   Avatar,
   TextField,
+  Snackbar,
+  Alert,
+  Stack
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
+import SendIcon from "@mui/icons-material/Send";
+import LogoutIcon from '@mui/icons-material/Logout';
 import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
-import { useChatContext } from "../../context/ChatContext";
+
 import axios from "axios";
+
+import ContactCard from "../contacts/ContactCard";
+import { useChatContext } from "../../context/ChatContext";
 import { CHAT_ROUTES } from "../../api/constants";
+
+import "../../index.css";
+import { green, red } from "@mui/material/colors";
+import { useAuthContext } from "../../context/AuthContext";
 
 // Styled components
 const SliderContainer = styled(Box)({
   position: "fixed",
   top: 0,
   right: 0,
-  width: "300px",
+  width: "350px",
   height: "100vh",
   backgroundColor: "#424242",
   color: "#fff",
@@ -31,7 +40,8 @@ const SliderContainer = styled(Box)({
   boxShadow: "-2px 0 5px rgba(0,0,0,0.3)",
   transition: "transform 0.3s ease",
   transform: "translateX(0)",
-  zIndex: 1300, // Make sure it is on top
+  zIndex: 1300,
+  overflowY: "auto", // Enable vertical scrolling
 });
 
 const CloseButton = styled(IconButton)({
@@ -42,59 +52,77 @@ const CloseButton = styled(IconButton)({
 });
 
 const GroupInfo = ({ open, onClose }) => {
+  const {user} = useAuthContext();
+
   const { selectedGroup, setSelectedGroup } = useChatContext();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [groupName, setGroupName] = useState(selectedGroup?.name || "");
   const [groupDescription, setGroupDescription] = useState(
-    selectedGroup?.description || ""
+    selectedGroup?.description || "Set a Description"
   );
-  const [groupImage, setGroupImage] = useState(selectedGroup?.image || "");
+  const [groupImage, setGroupImage] = useState(selectedGroup?.image || `${selectedGroup.name}`);
   const [imageFile, setImageFile] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarType, setSnackbarType] = useState("success");
 
-  if (!selectedGroup) return null;
-
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
+  // Delay rendering member list to allow global state update
+  const [members, setMembers] = useState([]);
+  useEffect(() => {
+    setTimeout(() => {
+      setMembers(selectedGroup?.members || []);
+    }, 500);
+  }, [selectedGroup]);
 
   const handleImageUpload = (event) => {
+    setChanged(true);
     setImageFile(event.target.files[0]);
-    // Preview or handle image file if needed
   };
 
   const handleDeleteImage = () => {
-    setGroupImage(""); // Set image URL to empty string
+    setGroupImage("");
+    setChanged(true);
   };
 
   const handleSave = async () => {
+    if (!groupName.trim()) {
+      setSnackbarType("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("name", groupName);
       formData.append("description", groupDescription);
-      formData.append("image", imageFile || groupImage); // Include the file if it exists
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
 
-      // Construct the URL with the group ID
       const updateGroupInfoUrl = CHAT_ROUTES.UPDATE_GROUP_INFO.replace(
         ":groupId",
         selectedGroup._id
       );
 
-      // Make API request to update group info
       const response = await axios.put(updateGroupInfoUrl, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      // Update the selected group in global state
       setSelectedGroup(response.data);
-
-      // Close the editing mode
-      setIsEditing(false);
+      setSnackbarType("success");
     } catch (error) {
       console.error("Error updating group info:", error);
+      setSnackbarType("error");
     }
+    setOpenSnackbar(true);
   };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+
 
   return (
     <SliderContainer
@@ -103,107 +131,122 @@ const GroupInfo = ({ open, onClose }) => {
       <CloseButton onClick={onClose}>
         <CloseIcon />
       </CloseButton>
-      <Box>
-        {isEditing ? (
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert severity={snackbarType} variant="filled" sx={{ width: "100%" }}>
+          {snackbarType === "success"
+            ? "Group info saved successfully"
+            : "Error: Group name cannot be empty"}
+        </Alert>
+      </Snackbar>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "stretch",
+          gap: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Avatar
+            src={groupImage}
+            alt={groupName}
+            sx={{ width: 100, height: 100, mb: 1 }}
+          />
           <Box>
-            <Avatar
-              src={groupImage}
-              alt={groupName}
-              sx={{ width: 100, height: 100 }}
-            />
-            <Button
-              variant="outlined"
-              component="label"
-              startIcon={<EditIcon />}
-            >
-              Upload
+            <IconButton component="label">
+              <EditIcon />
               <input
                 type="file"
                 hidden
                 accept="image/*"
                 onChange={handleImageUpload}
               />
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={handleDeleteImage}
-            >
-              Remove
-            </Button>
-            <TextField
-              fullWidth
-              label="Group Name"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label="Group Description"
-              value={groupDescription}
-              onChange={(e) => setGroupDescription(e.target.value)}
-              margin="normal"
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSave}
-              sx={{ mt: 2 }}
-            >
-              Save
-            </Button>
+            </IconButton>
+            <IconButton onClick={handleDeleteImage}>
+              <DeleteIcon />
+            </IconButton>
           </Box>
-        ) : (
-          <Box>
-            <Avatar
-              src={selectedGroup.image}
-              alt={selectedGroup.name}
-              sx={{ width: 100, height: 100 }}
-            />
-            <Box>
-              <IconButton onClick={handleEditClick}>
-                <EditIcon />
-              </IconButton>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit Group Info
-              </Button>
-            </Box>
-            <Typography variant="h5">{selectedGroup.name}</Typography>
-            <Typography variant="body2">{selectedGroup.description}</Typography>
-            <Typography variant="subtitle1">Members:</Typography>
-            {selectedGroup.members && selectedGroup.members.length > 0 ? (
-              <List>
-                {selectedGroup.members.map((member) => (
-                  <ListItem key={member._id}>
-                    <ListItemText
-                      primary={`${member.firstName} ${member.lastName}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            {isEditingName ? (
+              <TextField
+                fullWidth
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+              />
             ) : (
-              <Typography variant="body2">No members available</Typography>
+              groupName
             )}
-            {isEditing && (
-              <Box>
-                <Button variant="contained" color="secondary">
-                  Leave
-                </Button>
-                <Button variant="contained" color="error">
-                  Delete
-                </Button>
-              </Box>
+          </Typography>
+          <IconButton onClick={() => setIsEditingName(!isEditingName)}>
+            <EditIcon />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="body1" sx={{ flexGrow: 1 }}>
+            {isEditingDescription ? (
+              <TextField
+                fullWidth
+                multiline
+                value={groupDescription}
+                onChange={(e) => setGroupDescription(e.target.value)}
+              />
+            ) : (
+              groupDescription
             )}
-          </Box>
-        )}
+          </Typography>
+          <IconButton
+            onClick={() => setIsEditingDescription(!isEditingDescription)}
+          >
+            <EditIcon />
+          </IconButton>
+        </Box>
+        <Box>
+          <Typography variant="h6">Members:</Typography>
+          {members.length > 0 ? (
+            members.map((member) => (
+              <ContactCard
+                key={member._id}
+                username={member.username}
+                image={false}
+              />
+            ))
+          ) : (
+            <Typography variant="body2">No members available</Typography>
+          )}
+        </Box>
+        <Stack direction="column" spacing={2}>
+          <Button
+            variant="contained"
+            sx={{ bgcolor: green[400] }}
+            endIcon={<SendIcon />}
+            disabled={!(isEditingDescription || isEditingName)}
+          >
+            Save
+          </Button>
+          <Button variant="contained" color="error" startIcon={<LogoutIcon />}>
+            Leave
+          </Button>
+          <Button variant="contained" color="error" startIcon={<DeleteIcon />}
+            disabled={user.id !== selectedGroup.admin._id}
+          >
+            Delete
+          </Button>
+        </Stack>
       </Box>
     </SliderContainer>
   );

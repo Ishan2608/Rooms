@@ -22,9 +22,11 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
 const ContactCard = ({ username, fullName, image, onClick }) => {
   return (
     <StyledCard onClick={onClick}>
-      <Tooltip title={username}>
-        <StyledAvatar src={image} alt={username} />
-      </Tooltip>
+      {image && (
+        <Tooltip title={username}>
+          <StyledAvatar src={image} alt={username} />
+        </Tooltip>
+      )}
       <CardContent>
         <Typography variant="body1" noWrap>
           {username}

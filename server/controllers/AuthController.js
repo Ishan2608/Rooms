@@ -46,7 +46,7 @@ export const signup = async (req, res, next) => {
 
       // Update image if provided
       if (req.file) {
-        const folderPath = `/images/users/${user.id}`;
+        const folderPath = `/images/users`;
         const imageUrl = `${folderPath}/${req.file.filename}`;
         user.image = imageUrl;
       }
@@ -139,6 +139,18 @@ export const getUserInfo = async (req, res, next) => {
     }
 }
 
+// Helper function to delete the old profile image
+const deleteOldImage = (imagePath) => {
+  if (imagePath) {
+    const filePath = path.join(__dirname, '..', 'public', imagePath);
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error("Error deleting old image:", err);
+      }
+    });
+  }
+};
+
 export const updateProfileInfo = async (req, res, next) => {
   try {
     const userId = req.userId;
@@ -165,7 +177,12 @@ export const updateProfileInfo = async (req, res, next) => {
 
     // Update image if provided
     if (req.file) {
-      const folderPath = `/images/users/${userId}`;
+      // Delete old image if it exists
+      const oldImagePath = user.image; // Old image path in the database
+      deleteOldImage(oldImagePath);
+
+      // Save new image
+      const folderPath = `/images/users`;
       const imageUrl = `${folderPath}/${req.file.filename}`;
       user.image = imageUrl;
     }

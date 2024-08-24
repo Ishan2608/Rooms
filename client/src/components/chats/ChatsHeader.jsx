@@ -25,7 +25,16 @@ const StyledAvatar = styled(Avatar)({
 const ChatsHeader = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
-  const { selectedContact, selectedGroup, selectContact, setContacts, selectGroup } = useChatContext();
+  const {
+    selectedContact,
+    selectedGroup,
+    selectContact,
+    selectGroup,
+    setContacts,
+    unknownMessages,
+    blockUser,
+    addUnknownToContacts,
+  } = useChatContext();
 
   const displayName = selectedContact
     ? selectedContact.username
@@ -38,7 +47,7 @@ const ChatsHeader = () => {
     : null;
 
   const displayImage = selectedContact
-    ? selectedContact.image
+    ? `http://localhost:8747${selectedContact.image}`
     : selectedGroup
     ? selectedGroup.image
     : null;
@@ -69,31 +78,23 @@ const ChatsHeader = () => {
     try {
       if (!selectedContact) return;
 
-      // Prepare URL with contactId
       const url = CHAT_ROUTES.DELETE_A_CONTACT.replace(
         ":contactId",
         selectedContact._id
       );
 
-      // Make API request to delete the contact
       const response = await axios.delete(url, { withCredentials: true });
 
-      // Check if the response status is OK
       if (response.status === 200) {
         console.log("Contact deleted successfully:", response.data);
 
         // Fetch the updated contact list
         const updatedContactsResponse = await axios.get(
           CHAT_ROUTES.GET_ALL_CONTACTS,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
 
-        // Update local state to reflect the contact deletion
         setContacts(updatedContactsResponse.data);
-
-        // Clear the selected contact
         selectContact(null);
       } else {
         console.error(
@@ -102,15 +103,43 @@ const ChatsHeader = () => {
         );
       }
     } catch (error) {
-      // Log the error
       console.error("Error deleting contact:", error);
     } finally {
-      // Close the menu regardless of success or failure
       handleMenuClose();
     }
   };
 
+  const handleBlockUser = async () => {
+    try {
+      if (!selectedContact) return;
 
+      await blockUser(selectedContact._id);
+
+      selectContact(null);
+    } catch (error) {
+      console.error("Error blocking user:", error);
+    } finally {
+      handleMenuClose();
+    }
+  };
+
+  const handleAddUnknownToContacts = async () => {
+    try {
+      if (!selectedContact) return;
+
+      await addUnknownToContacts(selectedContact._id);
+
+      selectContact(null);
+    } catch (error) {
+      console.error("Error adding unknown user to contacts:", error);
+    } finally {
+      handleMenuClose();
+    }
+  };
+
+  const isUnknownUser =
+    selectedContact &&
+    unknownMessages.some((msg) => msg.sender === selectedContact._id);
 
   return (
     <>
@@ -142,17 +171,33 @@ const ChatsHeader = () => {
           onClose={handleMenuClose}
           PaperProps={{
             style: {
-              backgroundColor: "#424242", // Change to match the header background
-              color: "#fff", // Ensure text is readable
+              backgroundColor: "#424242",
+              color: "#fff",
             },
           }}
         >
           {selectedGroup && !selectedContact ? (
             <MenuItem onClick={handleViewGroupInfo}>View Group Info</MenuItem>
           ) : selectedContact ? (
-            <MenuItem onClick={handleDeleteContact} sx={{ color: "red" }}>
-              Delete Contact
-            </MenuItem>
+            isUnknownUser ? (
+              <>
+                <MenuItem onClick={handleAddUnknownToContacts}>
+                  Add to Contacts
+                </MenuItem>
+                <MenuItem onClick={handleBlockUser} sx={{ color: "orange" }}>
+                  Block this user
+                </MenuItem>
+              </>
+            ) : (
+              <>
+                <MenuItem onClick={handleDeleteContact} sx={{ color: "red" }}>
+                  Delete Contact
+                </MenuItem>
+                <MenuItem onClick={handleBlockUser} sx={{ color: "orange" }}>
+                  Block Contact
+                </MenuItem>
+              </>
+            )
           ) : null}
         </Menu>
       </HeaderContainer>

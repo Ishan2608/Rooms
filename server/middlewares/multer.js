@@ -5,7 +5,7 @@ import fs from "fs"
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const userId = req.userId || "default";
-    const folderPath = `./public/images/users/${userId}`;
+    const folderPath = `./public/images/users`;
     fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
     cb(null, folderPath);
   },
