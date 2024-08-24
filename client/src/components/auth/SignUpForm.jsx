@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import axios from "axios";
 
 // Imports from Material UI
@@ -8,8 +8,8 @@ import { Grid, TextField, Button, Stack, Stepper, Step, StepLabel, Alert} from "
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
 
-import { API_ROUTES } from "../api/constants";
-import "../index.css";
+import { API_ROUTES } from "../../api/constants";
+import "../../index.css";
 
 const steps = ["Set Email & username", "Set Profile Pic", "Set Password"];
 const VisuallyHiddenInput = styled("input")({

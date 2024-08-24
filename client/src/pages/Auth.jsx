@@ -8,10 +8,11 @@ import TabPanel from '@mui/lab/TabPanel';
 import Card from "@mui/material/Card";
 
 // Import Custom Component
-import LogInForm from '../components/LogInForm';
-import SignUpForm from "../components/SignUpForm";
+import LogInForm from "../components/auth/LogInForm"
+import SignUpForm from "../components/auth/SignUpForm";
 
 import "../index.css"
+import Header from '../components/auth/Header';
 
 const Auth = () => {
   const [value, setTabValue] = useState('1');
@@ -29,13 +30,7 @@ const Auth = () => {
           borderRadius: "10px",
         }}
       >
-        <center>
-          <h1>Welcome to Rooms</h1>
-          <p>
-            Share messages, images and files with your friends as much as you
-            want.
-          </p>
-        </center>
+        <Header/>
         <TabContext value={value}>
           <div style={{ borderBottom: 1, borderColor: "divider", display: 'flex', justifyContent: 'center' }}>
             <TabList onChange={handleTabChange} sx={{ width: '100%', maxWidth: '500px' }}>

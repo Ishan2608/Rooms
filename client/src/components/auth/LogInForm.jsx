@@ -2,11 +2,11 @@ import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button } from '@mui/material';
 import Alert from "@mui/material/Alert";
-import "../index.css";
+import "../../index.css";
 
 import axios from 'axios';
-import { useAuthContext } from "../context/AuthContext";
-import { API_ROUTES } from '../api/constants';
+import { useAuthContext } from "../../context/AuthContext";
+import { API_ROUTES } from '../../api/constants';
 
 const LogInForm = () => {
   const { login, isAuthenticated } = useAuthContext();

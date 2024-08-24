@@ -1,13 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, IconButton, InputAdornment, Paper } from "@mui/material";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 import EmojiPicker from "emoji-picker-react";
+import { io } from "socket.io-client";
+
+import { HOST } from "../../api/constants";
 
 const SendMessageContainer = () => {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [socket, setSocket] = useState(null);
+
+  // Initialize Socket.IO client
+  useEffect(() => {
+    const newSocket = io(HOST); // Replace with your server URL
+    setSocket(newSocket);
+
+    return () => newSocket.close();
+  }, []);
 
   const handleEmojiClick = (emojiObject) => {
     setMessage((prevMessage) => prevMessage + emojiObject.emoji);
@@ -18,9 +30,11 @@ const SendMessageContainer = () => {
   };
 
   const handleSendMessage = () => {
-    // Logic to send the message goes here
-    console.log("Message sent:", message);
-    setMessage("");
+    if (message.trim() !== "" && socket) {
+      // Emit the message to the server
+      socket.emit("sendMessage", message);
+      setMessage("");
+    }
   };
 
   const toggleEmojiPicker = () => {
@@ -36,6 +50,7 @@ const SendMessageContainer = () => {
         alignItems: "center",
         backgroundColor: "#424242", // Dark theme background
         color: "#ffffff", // Dark theme text color
+        position: "relative",
       }}
     >
       <TextField

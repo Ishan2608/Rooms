@@ -180,23 +180,38 @@ const ChatsHeader = () => {
             <MenuItem onClick={handleViewGroupInfo}>View Group Info</MenuItem>
           ) : selectedContact ? (
             isUnknownUser ? (
-              <>
-                <MenuItem onClick={handleAddUnknownToContacts}>
+              [
+                <MenuItem
+                  key="add-to-contacts"
+                  onClick={handleAddUnknownToContacts}
+                >
                   Add to Contacts
-                </MenuItem>
-                <MenuItem onClick={handleBlockUser} sx={{ color: "orange" }}>
+                </MenuItem>,
+                <MenuItem
+                  key="block-user"
+                  onClick={handleBlockUser}
+                  sx={{ color: "orange" }}
+                >
                   Block this user
-                </MenuItem>
-              </>
+                </MenuItem>,
+              ]
             ) : (
-              <>
-                <MenuItem onClick={handleDeleteContact} sx={{ color: "red" }}>
+              [
+                <MenuItem
+                  key="delete-contact"
+                  onClick={handleDeleteContact}
+                  sx={{ color: "red" }}
+                >
                   Delete Contact
-                </MenuItem>
-                <MenuItem onClick={handleBlockUser} sx={{ color: "orange" }}>
+                </MenuItem>,
+                <MenuItem
+                  key="block-contact"
+                  onClick={handleBlockUser}
+                  sx={{ color: "orange" }}
+                >
                   Block Contact
-                </MenuItem>
-              </>
+                </MenuItem>,
+              ]
             )
           ) : null}
         </Menu>

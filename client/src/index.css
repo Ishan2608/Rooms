@@ -42,6 +42,19 @@ body{
     align-items: center;
 }
 
+.header-flex{
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.header-img-container{
+  width: min-content;
+
+}
+
 .cover-screen{
     min-width: 100vw;
     min-height: 100vh;

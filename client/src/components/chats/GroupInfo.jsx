@@ -53,8 +53,13 @@ const CloseButton = styled(IconButton)({
 
 const GroupInfo = ({ open, onClose }) => {
   const {user} = useAuthContext();
-
   const { selectedGroup, setSelectedGroup } = useChatContext();
+
+  // Early return if no group is selected
+  if (!selectedGroup) {
+    return null; // or you can return a placeholder UI if desired
+  }
+
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [groupName, setGroupName] = useState(selectedGroup?.name || "");
@@ -242,7 +247,7 @@ const GroupInfo = ({ open, onClose }) => {
             Leave
           </Button>
           <Button variant="contained" color="error" startIcon={<DeleteIcon />}
-            disabled={user.id !== selectedGroup.admin._id}
+            disabled={user.id != selectedGroup.admin._id}
           >
             Delete
           </Button>
