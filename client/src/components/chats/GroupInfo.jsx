@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  IconButton,
-  Button,
-  Typography,
-  Box,
-  Avatar,
-  TextField,
-  Snackbar,
-  Alert,
-  Stack
-} from "@mui/material";
+import { 
+  IconButton, Button, Typography, Box, 
+  Avatar, TextField, Snackbar, Alert, Stack 
+} 
+from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import SendIcon from "@mui/icons-material/Send";
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -41,7 +35,7 @@ const SliderContainer = styled(Box)({
   transition: "transform 0.3s ease",
   transform: "translateX(0)",
   zIndex: 1300,
-  overflowY: "auto", // Enable vertical scrolling
+  overflowY: "auto",
 });
 
 const CloseButton = styled(IconButton)({
@@ -55,14 +49,13 @@ const GroupInfo = ({ open, onClose }) => {
   const {user} = useAuthContext();
   const { selectedGroup, setSelectedGroup } = useChatContext();
 
-  // Early return if no group is selected
   if (!selectedGroup) {
-    return null; // or you can return a placeholder UI if desired
+    return null;
   }
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [groupName, setGroupName] = useState(selectedGroup?.name || "");
+  const [groupName, setGroupName] = useState(selectedGroup?.name || "No Name");
   const [groupDescription, setGroupDescription] = useState(
     selectedGroup?.description || "Set a Description"
   );
@@ -124,6 +117,17 @@ const GroupInfo = ({ open, onClose }) => {
     setOpenSnackbar(true);
   };
 
+  const handleLeaveGroup = async () => {
+    console.log("Group will be Left.");
+  }
+  const handleDeleteGroup = async () => {
+    if (user.id === selectedGroup.admin._id){
+      console.log("Group will be deleted");
+    } else {
+      console.log("You are not authorized to delete the Group");
+    }
+  }
+
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
@@ -164,9 +168,7 @@ const GroupInfo = ({ open, onClose }) => {
             alignItems: "center",
           }}
         >
-          <Avatar
-            src={groupImage}
-            alt={groupName}
+          <Avatar src={groupImage} alt={groupName}
             sx={{ width: 100, height: 100, mb: 1 }}
           />
           <Box>
@@ -187,9 +189,7 @@ const GroupInfo = ({ open, onClose }) => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             {isEditingName ? (
-              <TextField
-                fullWidth
-                value={groupName}
+              <TextField fullWidth value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
               />
             ) : (
@@ -204,19 +204,14 @@ const GroupInfo = ({ open, onClose }) => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="body1" sx={{ flexGrow: 1 }}>
             {isEditingDescription ? (
-              <TextField
-                fullWidth
-                multiline
+              <TextField fullWidth multiline
                 value={groupDescription}
                 onChange={(e) => setGroupDescription(e.target.value)}
               />
-            ) : (
-              groupDescription
-            )}
+              ) : ( groupDescription )
+            }
           </Typography>
-          <IconButton
-            onClick={() => setIsEditingDescription(!isEditingDescription)}
-          >
+          <IconButton onClick={() => setIsEditingDescription(!isEditingDescription)} >
             <EditIcon />
           </IconButton>
         </Box>
@@ -240,14 +235,20 @@ const GroupInfo = ({ open, onClose }) => {
             sx={{ bgcolor: green[400] }}
             endIcon={<SendIcon />}
             disabled={!(isEditingDescription || isEditingName)}
+            onClick={handleSave}
           >
             Save
           </Button>
-          <Button variant="contained" color="error" startIcon={<LogoutIcon />}>
+          <Button 
+            variant="contained" color="error" startIcon={<LogoutIcon />}
+            onClick={handleLeaveGroup}
+          >
             Leave
           </Button>
-          <Button variant="contained" color="error" startIcon={<DeleteIcon />}
+          <Button 
+            variant="contained" color="error" startIcon={<DeleteIcon />}
             disabled={user.id != selectedGroup.admin._id}
+            onClick={handleDeleteGroup}
           >
             Delete
           </Button>

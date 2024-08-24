@@ -79,6 +79,11 @@ const SignUpForm = () => {
       setAlertMsg("Email not specified");
       return false;
     }
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setAlertMsg("Email not Valid");
+      setSeverity("error");
+      return false;
+    }
     if (form.firstName === "") {
       setSeverity("error");
       setAlertMsg("First name not defined");
@@ -107,7 +112,7 @@ const SignUpForm = () => {
 
     setSeverity("success");
     setAlertMsg("Form has been submitted");
-    return true; // Return true if the form is valid
+    return true;
   };
 
   const callSignUpAPI = async (form) => {
@@ -118,13 +123,8 @@ const SignUpForm = () => {
     data.append("email", form.email);
     data.append("password", form.password);
     if (form.image) {
-      data.append("image", form.image); // Attach the image file
+      data.append("image", form.image); 
     }
-    // show submitted form details
-    // for (let [key, value] of data.entries()) {
-    //   console.log(`${key}: ${value}`);
-    // }
-    
     try {
       const response = await axios.post(API_ROUTES.SIGN_UP, data, 
         {
@@ -135,11 +135,9 @@ const SignUpForm = () => {
         }
       );
       if (response.status === 201) {
-        // console.log("Status: 201");
         const cookieToken = document.cookie.split("; ")
           .find((row) => row.startsWith("jwt="))
           ?.split("=")[1];
-        // console.log(`The Received Token is: \n${cookieToken}`);
         login(response.data, cookieToken);
         nav("/profile");
       } else {
@@ -148,7 +146,6 @@ const SignUpForm = () => {
       }
     } catch (error) {
       if (error.response) {
-        console.log("Response Data:", error.response.data); // Add this line
         setSeverity("error");
         setAlertMsg(`ERROR: ${error.response.data}`);
       } else {
@@ -156,11 +153,9 @@ const SignUpForm = () => {
         setSeverity("error");
       }
     }
-
   };
 
   const handleSignUp = () => {
-    // Run validation and only proceed if it returns true
     const isFormValid = validateForm(form);
     if (isFormValid) {
       console.log("Form is Good to Go");
@@ -230,6 +225,7 @@ const SignUpForm = () => {
                   variant="contained"
                   tabIndex={-1}
                   startIcon={<CloudUploadIcon />}
+                  sx={{ padding: "5px 0px 5px 0px" }}
                 >
                   Upload a Profile Picture
                   <VisuallyHiddenInput
@@ -314,15 +310,15 @@ const SignUpForm = () => {
             marginTop: "10px",
           }}
         >
-          <Button disabled={activeStep === 0} onClick={handleBack}>
+          <Button disabled={activeStep === 0} onClick={handleBack} sx={{padding: "5px 0px 5px 0px"}}>
             Back
           </Button>
           {activeStep === steps.length - 1 ? (
-            <Button variant="contained" onClick={handleSignUp}>
+            <Button variant="contained" onClick={handleSignUp} sx={{padding: "5px 0px 5px 0px"}}>
               Sign Up
             </Button>
           ) : (
-            <Button variant="contained" color="primary" onClick={handleNext}>
+            <Button variant="contained" color="primary" onClick={handleNext} sx={{padding: "5px 0px 5px 0px"}}>
               Next
             </Button>
           )}

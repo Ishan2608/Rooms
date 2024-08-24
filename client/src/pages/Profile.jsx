@@ -15,13 +15,11 @@ import axios from "axios"
 import "../index.css"
 
 const Profile = () => {
-  // access global context
   const { isAuthenticated, user, setUser, logout} = useAuthContext();
   const navigate = useNavigate();
 
   // Redirect if the user is already authenticated
   useEffect(() => {
-    // console.log(user)
     if (!isAuthenticated) {
       navigate("/auth");
     }
@@ -38,11 +36,8 @@ const Profile = () => {
     password: "",
   }));
 
-
-  // console.log(userData.image);
   // State for the profile picture and Snackbar
   const [profilePic, setProfilePic] = useState(userData.image);
-
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarType, setSnackbarType] = useState("success");
 
@@ -56,7 +51,6 @@ const Profile = () => {
 
   const validateForm = () => {
     const { firstName, lastName, email, username, password } = userData;
-    // Example validation: check if fields are not empty and email format is correct
     const isValid =
       firstName &&
       lastName &&
@@ -91,9 +85,7 @@ const Profile = () => {
         });
 
         if (response.status === 200) {
-          console.log("User data saved:", response.data);
           setUser(response.data);
-
           setSnackbarType("success");
         } else {
           setSnackbarType("error");

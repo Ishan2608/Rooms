@@ -1,4 +1,4 @@
-# Rooms
+# Rooms (Work in Progress)
 A real-time chat application built using MERN stack, enabling user-to-user and user-to-group messaging with text, images, and file sharing capabilities.
 ## Features
 - Real-time messaging for individuals and groups
@@ -23,7 +23,11 @@ The project consists of two main folders:
 - Send text, image, or file messages to individuals or groups
 ## Contributing
 Contributions are welcome! Please fork the repository, make changes, and submit a pull request.
-License
+License.
+I have a few tasks for you:
+- Change theme from boring to an Elegant Design.
+- Improve Profile Page Design.
+- In the group info box, clicking on a member should allow you to start messaging him.
 This project is licensed under the MIT License. See LICENSE for details.
 Acknowledgments
 Special thanks to the Material UI team for their excellent component library

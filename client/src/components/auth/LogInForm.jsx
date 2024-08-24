@@ -12,14 +12,13 @@ const LogInForm = () => {
   const { login, isAuthenticated } = useAuthContext();
   const nav = useNavigate();
 
-  // Redirect if the user is already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       nav("/profile");
     }
   }, [isAuthenticated, nav]);
 
-  const [loginForm, setloginForm] = useState({
+  const [logInForm, setLogInForm] = useState({
     email: "",
     password: "",
   });
@@ -27,26 +26,31 @@ const LogInForm = () => {
   const [alertMsg, setAlertMsg] = useState(null);
   const [severity, setSeverity] = useState("error");
 
-  const validateloginForm = (loginForm) => {
-    if (loginForm.email === "") {
+  const validateLogInForm = (logInForm) => {
+    if (logInForm.email === "") {
       setAlertMsg("Email not specified");
       setSeverity("error");
       return false;
     }
-    if (loginForm.password === "") {
-      setAlertMsg("Password not specified");
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      setAlertMsg("Email not Valid");
       setSeverity("error");
       return false;
     }
+    if (logInForm.password === "") {
+        setAlertMsg("Password not specified");
+        setSeverity("error");
+        return false;
+      }
     setSeverity("success");
-    setAlertMsg("loginForm has been submitted");
+    setAlertMsg("logInForm has been submitted");
     return true;
   };
 
-  const callLogInAPI = async (loginForm) => {
+  const callLogInAPI = async (logInForm) => {
     const data = new FormData()
-    data.append("email", loginForm.email);
-    data.append("password", loginForm.password);
+    data.append("email", logInForm.email);
+    data.append("password", logInForm.password);
     for (let [key, value] of data.entries()) {
       console.log(`${key}: ${value}`);
     }
@@ -88,13 +92,11 @@ const LogInForm = () => {
   };
 
   const handleLogIn = () => {
-    const isloginFormValid = validateloginForm(loginForm);
-    if (isloginFormValid) {
-      console.log("loginForm is Good to Go");
-      console.log(loginForm);
-      callLogInAPI(loginForm);
+    const isLogInFormValid = validateLogInForm(logInForm);
+    if (isLogInFormValid) {
+      callLogInAPI(logInForm);
     } else {
-      console.log("loginForm cannot be submitted");
+      console.log("logInForm cannot be submitted");
     }
   };
 
@@ -113,7 +115,7 @@ const LogInForm = () => {
         label="Email"
         type="email"
         onChange={(e) => {
-          setloginForm({ ...loginForm, [e.target.name]: e.target.value });
+          setLogInForm({ ...logInForm, [e.target.name]: e.target.value });
         }}
       />
       <TextField
@@ -122,9 +124,15 @@ const LogInForm = () => {
         name="password"
         label="Password"
         type="password"
-        onChange={(e) => setloginForm({ ...loginForm, [e.target.name]: e.target.value })}
+        onChange={(e) =>
+          setLogInForm({ ...logInForm, [e.target.name]: e.target.value })
+        }
       />
-      <Button variant="contained" onClick={handleLogIn}>
+      <Button
+        variant="contained"
+        onClick={handleLogIn}
+        sx={{ padding: "5px 0px 5px 0px" }}
+      >
         Log In
       </Button>
     </div>
