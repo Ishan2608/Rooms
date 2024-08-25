@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 // Import Contexts
 import { useAuthContext, AuthProvider } from "./context/AuthContext";
 import { ChatProvider } from "./context/ChatContext";
+import { SocketProvider } from "./context/SocketContext";
 
 const darkTheme = createTheme({
   palette: {
@@ -34,18 +35,26 @@ const App = () => {
             <Route path="/auth" element={<Auth />} />
             <Route
               path="/chat"
-              element={<ProtectedRoute element={
-                  <ChatProvider>
-                    <Chat/>
-                  </ChatProvider>
-                } />
+              element={
+                <ProtectedRoute
+                  element={
+                    <ChatProvider>
+                      <SocketProvider>
+                        <Chat />
+                      </SocketProvider>
+                    </ChatProvider>
+                  }
+                />
               }
               // element={
-              //     <ChatProvider>
-              //       <Chat/>
-              //     </ChatProvider>
-              //   }
-              />
+              //   <ChatProvider>
+              //     <SocketProvider>
+              //       <Chat />
+              //     </SocketProvider>
+              //   </ChatProvider>
+              // }
+              
+            />
             <Route
               path="/profile"
               element={<ProtectedRoute element={<Profile />} />}

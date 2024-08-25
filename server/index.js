@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authRoutes from "./routes/AuthRoutes.js";
 import chatRoutes from "./routes/ChatRoutes.js";
+import {setupSocket} from './socket.js';
 
 // Get the current directory name
 import { fileURLToPath } from 'url';
@@ -43,6 +44,8 @@ app.use("/api/chats", chatRoutes);
 const server = app.listen(port, () => {
   console.log(`Server running at port: ${port}`);
 });
+
+setupSocket(server);
 
 // connect to the database using Mongoose library (an Object Document Mapping tool)
 mongoose

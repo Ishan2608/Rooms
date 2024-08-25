@@ -6,6 +6,11 @@ const chatSchema = new mongoose.Schema({
     ref: "Users",
     required: true,
   },
+  recipient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+    required: false,
+  },
   content: {
     type: String,
     required: false,
@@ -14,15 +19,11 @@ const chatSchema = new mongoose.Schema({
     url: { type: String },
     name: { type: String },
     type: { type: String },
+    required: false,
   },
   group: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Groups",
-    required: false,
-  },
-  recipient: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
     required: false,
   },
   createdAt: {
