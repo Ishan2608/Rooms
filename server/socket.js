@@ -1,6 +1,7 @@
 import { Server as SocketIOServer } from "socket.io";
-import Chat from "./models/ChatModel";
-import Group from "./models/GroupModel";
+import Chat from "./models/ChatModel.js";
+import Group from "./models/GroupModel.js";
+import User from "./models/UserModel.js"
 
 export const setupSocket = (server) => {
   const io = new SocketIOServer(server, {
@@ -34,7 +35,8 @@ export const setupSocket = (server) => {
     if (recipientSocket) {
       io.to(recipientSocket).emit("receiveMessage", messageData);
     }
-    if (senderSocket) {
+    // Optionally, you can skip this to prevent the message from being sent back to the sender
+    if (senderSocket && senderSocket !== recipientSocket) {
       io.to(senderSocket).emit("receiveMessage", messageData);
     }
   };
@@ -62,7 +64,7 @@ export const setupSocket = (server) => {
       const group = await Group.findById(groupId).populate("members");
 
       if (!group) {
-        return socket.emit("error", { message: "Group not found" });
+        return;
       }
 
       // Update group details
@@ -93,7 +95,6 @@ export const setupSocket = (server) => {
       });
     } catch (error) {
       console.error("Error handling updateGroupInfo event:", error);
-      socket.emit("error", { message: "Server error" });
     }
   };
 
@@ -102,7 +103,7 @@ export const setupSocket = (server) => {
       const group = await Group.findById(groupId).populate("members");
 
       if (!group) {
-        return socket.emit("error", { message: "Group not found" });
+        return;
       }
 
       // Emit an event to all group members to notify them of the deletion
@@ -117,8 +118,28 @@ export const setupSocket = (server) => {
       await Group.findByIdAndDelete(groupId);
     } catch (error) {
       console.error("Error handling deleteGroup event:", error);
-      socket.emit("error", { message: "Server error" });
     }
+  };
+
+  const sendGroupMessage = async (message) => {
+    const group = await Group.findById(message.groupId).populate("members");
+
+    if (!group) {
+      return;
+    }
+
+    const createdMessage = await Chat.create(message);
+    const messageData = await Chat.findById(createdMessage._id)
+      .populate("sender", "id email firstName lastName username image")
+      .populate("groupId", "name");
+
+    // Notify all members in the group
+    group.members.forEach((memberId) => {
+      const memberSocket = userMap.get(memberId.toString());
+      if (memberSocket) {
+        io.to(memberSocket).emit("receiveGroupMessage", messageData);
+      }
+    });
   };
 
   io.on("connection", (socket) => {
@@ -134,6 +155,7 @@ export const setupSocket = (server) => {
     socket.on("createGroup", createGroup);
     socket.on("updateGroupInfo", updateGroupInfo);
     socket.on("deleteGroup", deleteGroup);
+    socket.on("sendGroupMessage", sendGroupMessage);
     socket.on("disconnect", () => disconnect(socket));
   });
 };

@@ -19,7 +19,6 @@ const chatSchema = new mongoose.Schema({
     url: { type: String },
     name: { type: String },
     type: { type: String },
-    required: false,
   },
   group: {
     type: mongoose.Schema.Types.ObjectId,

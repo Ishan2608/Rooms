@@ -32,11 +32,6 @@ const LogInForm = () => {
       setSeverity("error");
       return false;
     }
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-      setAlertMsg("Email not Valid");
-      setSeverity("error");
-      return false;
-    }
     if (logInForm.password === "") {
         setAlertMsg("Password not specified");
         setSeverity("error");
@@ -51,9 +46,9 @@ const LogInForm = () => {
     const data = new FormData()
     data.append("email", logInForm.email);
     data.append("password", logInForm.password);
-    for (let [key, value] of data.entries()) {
-      console.log(`${key}: ${value}`);
-    }
+    // for (let [key, value] of data.entries()) {
+    //   console.log(`${key}: ${value}`);
+    // }
     try {
       const response = await axios.post(API_ROUTES.LOG_IN, data, {
         headers:{

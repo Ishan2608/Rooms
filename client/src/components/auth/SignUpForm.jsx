@@ -11,7 +11,7 @@ import { styled } from "@mui/material/styles";
 import { API_ROUTES } from "../../api/constants";
 import "../../index.css";
 
-const steps = ["Set Email & username", "Set Profile Pic", "Set Password"];
+const steps = ["Name & Email", "Profile", "Password"];
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",

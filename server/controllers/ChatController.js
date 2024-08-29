@@ -117,8 +117,8 @@ export const fetchUserChatMessages = async (req, res) => {
       ],
     })
       .sort({ createdAt: 1 }) // Sort messages by creation time in ascending order
-      .populate("sender", "username firstName lastName") // Optionally populate sender info
-      .populate("recipient", "username firstName lastName"); // Optionally populate recipient info
+      .populate("sender", "id username firstName lastName") // Optionally populate sender info
+      .populate("recipient", "id username firstName lastName"); // Optionally populate recipient info
 
     res.status(200).json(messages);
   } catch (err) {

@@ -96,11 +96,7 @@ const GroupInfo = ({ open, onClose }) => {
       if (imageFile) {
         formData.append("image", imageFile);
       }
-
-      const updateGroupInfoUrl = CHAT_ROUTES.UPDATE_GROUP_INFO.replace(
-        ":groupId",
-        selectedGroup._id
-      );
+      const updateGroupInfoUrl = `${CHAT_ROUTES.UPDATE_GROUP_INFO}/${selectedGroup._id}`;
 
       const response = await axios.put(updateGroupInfoUrl, formData, {
         headers: {

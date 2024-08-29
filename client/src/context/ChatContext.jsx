@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 
+import axios from "axios";
+import { CHAT_ROUTES } from "../api/constants";
 // Create ChatContext
 const ChatContext = createContext();
 
@@ -50,15 +52,30 @@ const ChatProvider = ({ children }) => {
     setBlockedUsers(newBlockedUsers);
   }, []);
 
-  const fetchChatMessages = useCallback(async (chatEntity) => {
-    try {
-      const messages = [];
-      setCurrentMessages(messages);
-    } catch (error) {
-      console.error("Error fetching chat messages:", error);
-      setCurrentMessages([]); // Clear messages on error
-    }
-  }, []);
+ const fetchChatMessages = useCallback(async (chatEntity) => {
+   if (!chatEntity) return;
+
+   try {
+     let url = "";
+     if (chatEntity._id) {
+       // Fetch messages for a contact
+       url = `${CHAT_ROUTES.FETCH_USER_CHAT_MESSAGES}/${chatEntity._id}`
+     } else if (chatEntity.groupId) {
+       // Fetch messages for a group
+       url = `${CHAT_ROUTES.FETCH_GROUP_CHAT_MESSAGES}/${chatEntity.groupId}`;
+     }
+
+     if (url) {
+       const response = await axios.get(url);
+       setCurrentMessages(response.data);
+     } else {
+       setCurrentMessages([]);
+     }
+   } catch (error) {
+     console.error("Error fetching chat messages:", error);
+     setCurrentMessages([]); // Clear messages on error
+   }
+ }, []);
 
   return (
     <ChatContext.Provider

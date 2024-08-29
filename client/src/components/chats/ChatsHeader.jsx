@@ -77,12 +77,7 @@ const ChatsHeader = () => {
   const handleDeleteContact = async () => {
     try {
       if (!selectedContact) return;
-
-      const url = CHAT_ROUTES.DELETE_A_CONTACT.replace(
-        ":contactId",
-        selectedContact._id
-      );
-
+      const url = `${CHAT_ROUTES.DELETE_A_CONTACT}/${selectedContact._id}`;
       const response = await axios.delete(url, { withCredentials: true });
 
       if (response.status === 200) {

@@ -4,22 +4,19 @@ import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 import EmojiPicker from "emoji-picker-react";
-import { io } from "socket.io-client";
-
-import { HOST } from "../../api/constants";
+import { useChatContext } from "../../context/ChatContext";
+import { useSocketContext } from "../../context/SocketContext";
+import { useAuthContext } from "../../context/AuthContext";
 
 const SendMessageContainer = () => {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [socket, setSocket] = useState(null);
 
-  // Initialize Socket.IO client
-  useEffect(() => {
-    const newSocket = io(HOST); // Replace with your server URL
-    setSocket(newSocket);
+  const {user} = useAuthContext();
 
-    return () => newSocket.close();
-  }, []);
+  const { selectedContact, currentMessages, setCurrentMessages } =
+    useChatContext();
+  const socket = useSocketContext();
 
   const handleEmojiClick = (emojiObject) => {
     setMessage((prevMessage) => prevMessage + emojiObject.emoji);
@@ -30,12 +27,53 @@ const SendMessageContainer = () => {
   };
 
   const handleSendMessage = () => {
-    if (message.trim() !== "" && socket) {
+    if (message.trim() !== "" && selectedContact && socket) {
+      const newMessage = {
+        content: message,
+        sender: user.id,
+        recipient: selectedContact._id,
+        type: "text",
+        group: selectedContact.isGroup ? selectedContact._id : null,
+      };
+
       // Emit the message to the server
-      socket.emit("sendMessage", message);
+      socket.emit("sendMessage", newMessage);
+
+      // Update the frontend state with the message as sent
+      setCurrentMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          ...newMessage,
+          isSender: true,
+        },
+      ]);
       setMessage("");
     }
   };
+
+  useEffect(() => {
+    if (socket) {
+      // Listen for the messageReceived event from the server
+      socket.on("messageReceived", (receivedMessage) => {
+        // Update the frontend state with the received message
+        if (
+          receivedMessage.recipient === selectedContact._id ||
+          receivedMessage.group === selectedContact._id
+        ) {
+          setCurrentMessages((prevMessages) => [
+            ...prevMessages,
+            receivedMessage,
+          ]);
+        }
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off("messageReceived");
+      }
+    };
+  }, [socket, selectedContact, setCurrentMessages]);
 
   const toggleEmojiPicker = () => {
     setShowEmojiPicker(!showEmojiPicker);

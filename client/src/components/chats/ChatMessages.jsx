@@ -4,9 +4,17 @@ import NoMessagesContainer from "./NoMessagesContainer"; // Import the NoMessage
 import { useChatContext } from "../../context/ChatContext";
 
 const ChatMessages = () => {
-
-  const { currentMessages } = useChatContext();
+  const { selectedContact, selectedGroup, currentMessages, fetchChatMessages, } = useChatContext();
   const hasMessages = currentMessages && currentMessages.length > 0;
+
+  useEffect(() => {
+    if (selectedContact) {
+      fetchChatMessages(selectedContact);
+    } else if (selectedGroup) {
+      fetchChatMessages(selectedGroup);
+    }
+  }, [selectedContact, selectedGroup, currentMessages, fetchChatMessages]);
+
   return (
     <div
       style={{
@@ -17,8 +25,8 @@ const ChatMessages = () => {
       }}
     >
       {hasMessages ? (
-        currentMessages.map((message, index) => (
-          <Message index={index} message={message} />
+        currentMessages.map((message) => (
+          <Message index={message._id} message={message} />
         ))
       ) : (
         <NoMessagesContainer />
