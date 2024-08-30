@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import Message from "./Message"; // Ensure the path is correct
 import NoMessagesContainer from "./NoMessagesContainer"; // Import the NoMessagesContainer component
 import { useChatContext } from "../../context/ChatContext";
@@ -13,7 +13,7 @@ const ChatMessages = () => {
     } else if (selectedGroup) {
       fetchChatMessages(selectedGroup);
     }
-  }, [selectedContact, selectedGroup, currentMessages, fetchChatMessages]);
+  }, [selectedContact, selectedGroup, fetchChatMessages]);
 
   return (
     <div

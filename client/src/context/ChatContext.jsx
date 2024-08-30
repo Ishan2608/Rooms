@@ -66,7 +66,7 @@ const ChatProvider = ({ children }) => {
      }
 
      if (url) {
-       const response = await axios.get(url);
+       const response = await axios.get(url, {withCredentials: true});
        setCurrentMessages(response.data);
      } else {
        setCurrentMessages([]);
@@ -96,6 +96,7 @@ const ChatProvider = ({ children }) => {
         updateUnknownMessages,
         updateBlockedUsers,
         setCurrentMessages,
+        fetchChatMessages
       }}
     >
       {children}

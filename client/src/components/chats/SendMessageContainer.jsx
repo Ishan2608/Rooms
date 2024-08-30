@@ -44,7 +44,7 @@ const SendMessageContainer = () => {
         ...prevMessages,
         {
           ...newMessage,
-          isSender: true,
+          issender: true,
         },
       ]);
       setMessage("");

@@ -3,44 +3,46 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/system";
 import { useAuthContext } from "../../context/AuthContext";
 
-const MessageContainer = styled(Box)(({ isSender }) => ({
+const MessageContainer = styled(Box)(({ issender }) => ({
   display: "flex",
   flexDirection: "column",
-  alignItems: isSender ? "flex-end" : "flex-start",
+  alignItems: issender ? "flex-end" : "flex-start",
   margin: "10px 0",
 }));
 
-const MessageBubble = styled(Box)(({ isSender }) => ({
+const MessageBubble = styled(Box)(({ issender }) => ({
   maxWidth: "70%",
   padding: "10px",
   borderRadius: "10px",
-  backgroundColor: isSender ? "#007aff" : "#444",
+  backgroundColor: issender ? "#007aff" : "#444",
   color: "#fff",
   wordWrap: "break-word",
   boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
 }));
 
-const MessageTimestamp = styled(Typography)(({ isSender }) => ({
+const MessageTimestamp = styled(Typography)(({ issender }) => ({
   fontSize: "0.8em",
   color: "#888",
   marginTop: "5px",
-  textAlign: isSender ? "right" : "left",
+  textAlign: issender ? "right" : "left",
 }));
 
 const Message = ({ message }) => {
   const {user} = useAuthContext();
-  const isSender = String(message.sender) === String(user.id);
+  console.log("Sender is: ");
+  console.log(message.sender);
+  const issender = String(message.sender._id) === String(user.id);
 
   return (
-    <MessageContainer isSender={isSender}>
-      <MessageBubble isSender={isSender}>
+    <MessageContainer issender={issender}>
+      <MessageBubble issender={issender}>
         {message.content && <Typography>{message.content}</Typography>}
         {message.file?.url && (
           <img src={message.file.url} alt="file" style={{ maxWidth: "100%" }} />
         )}
       </MessageBubble>
-      <MessageTimestamp isSender={isSender}>
-        {new Date(message.createdAt).toLocaleTimeString()}
+      <MessageTimestamp issender={issender}>
+        {new Date(message.createdAt).toLocaleDateString()}
       </MessageTimestamp>
     </MessageContainer>
   );
