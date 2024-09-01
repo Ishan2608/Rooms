@@ -13,8 +13,13 @@ export const useSocketContext = () => {
 export const SocketProvider = ({ children }) => {
   const socket = useRef();
   const { user } = useAuthContext();
-  const { setCurrentMessages, updateGroups, selectGroup, selectContact } =
-    useChatContext();
+  const {
+    selectedContact,
+    selectedGroup,
+    setCurrentMessages,
+    updateGroups,
+    selectGroup,
+  } = useChatContext();
 
   useEffect(() => {
     if (user) {
@@ -28,34 +33,51 @@ export const SocketProvider = ({ children }) => {
       });
 
       const handleReceiveMessage = (message) => {
-        setCurrentMessages((prevMessages) => {
-          // Check if the message already exists in the current state
-          const messageExists = prevMessages.some(
-            (msg) => msg._id === message._id
-          );
+        // Update messages only if the message is from the currently selected contact
+        if (selectedContact && message.sender._id === selectedContact._id) {
+          setCurrentMessages((prevMessages) => {
+            const messageExists = prevMessages.some(
+              (msg) => msg._id === message._id
+            );
 
-          // If the message doesn't exist, add it to the state
-          if (!messageExists) {
-            // Additional check: if the sender is the current user, ensure it's not a duplicate
-            if (message.sender._id !== user.id) {
+            if (!messageExists && message.sender._id !== user.id) {
               return [...prevMessages, message];
             }
-          }
 
-          return prevMessages;
-        });
+            return prevMessages;
+          });
+        }
+      };
 
-        // console.log("Message received:", message);
+      const handleReceiveGroupMessage = (message) => {
+        // Ensure that the message is only handled if it comes from the selected group
+        if (selectedGroup && message.group._id === selectedGroup._id) {
+          setCurrentMessages((prevMessages) => {
+            // Check if the message already exists in the state
+            const messageExists = prevMessages.some(
+              (msg) => msg._id === message._id
+            );
+
+            // If the message does not exist, add it to the state
+            if (!messageExists) {
+              // Ensure the message is not from the current user if it's a group message
+              if (message.sender._id !== user.id) {
+                return [...prevMessages, message];
+              }
+            }
+
+            // Return the previous state if the message already exists or is from the current user
+            return prevMessages;
+          });
+        }
       };
 
 
-      // Handle receiving a new group
       const handleGroupCreated = (group) => {
         updateGroups((prevGroups) => [...prevGroups, group]);
         console.log("New group created:", group);
       };
 
-      // Handle group updates
       const handleGroupUpdated = (group) => {
         updateGroups((prevGroups) =>
           prevGroups.map((g) => (g._id === group._id ? group : g))
@@ -63,7 +85,6 @@ export const SocketProvider = ({ children }) => {
         console.log("Group updated:", group);
       };
 
-      // Handle group deletion
       const handleGroupDeleted = (groupId) => {
         updateGroups((prevGroups) =>
           prevGroups.filter((g) => g._id !== groupId)
@@ -75,6 +96,7 @@ export const SocketProvider = ({ children }) => {
       };
 
       socket.current.on("receiveMessage", handleReceiveMessage);
+      socket.current.on("receiveGroupMessage", handleReceiveGroupMessage);
       socket.current.on("groupCreated", handleGroupCreated);
       socket.current.on("groupUpdated", handleGroupUpdated);
       socket.current.on("groupDeleted", handleGroupDeleted);
@@ -83,7 +105,14 @@ export const SocketProvider = ({ children }) => {
         socket.current.disconnect();
       };
     }
-  }, [user, setCurrentMessages, updateGroups, selectGroup]);
+  }, [
+    user,
+    selectedContact,
+    selectedGroup,
+    setCurrentMessages,
+    updateGroups,
+    selectGroup,
+  ]);
 
   return (
     <SocketContext.Provider value={socket.current}>

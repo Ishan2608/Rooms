@@ -14,10 +14,10 @@ import { CHAT_ROUTES } from "../../api/constants";
 
 const GroupsList = () => {
   const {
-    selectGroup,
     groups = [],
-    updateGroups,
     selectedGroup,
+    updateGroups,
+    selectGroup
   } = useChatContext(); // Default groups to empty array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

@@ -53,16 +53,18 @@ const ChatProvider = ({ children }) => {
   }, []);
 
  const fetchChatMessages = useCallback(async (chatEntity) => {
-   if (!chatEntity) return;
+   if (!chatEntity) {
+    return;
+   }
 
    try {
      let url = "";
-     if (chatEntity._id) {
-       // Fetch messages for a contact
+     if (selectedContact) {
+      //  console.log(chatEntity._id);
        url = `${CHAT_ROUTES.FETCH_USER_CHAT_MESSAGES}/${chatEntity._id}`
-     } else if (chatEntity.groupId) {
-       // Fetch messages for a group
-       url = `${CHAT_ROUTES.FETCH_GROUP_CHAT_MESSAGES}/${chatEntity.groupId}`;
+     } else if (selectedGroup) {
+      //  console.log(chatEntity._id);
+       url = `${CHAT_ROUTES.FETCH_GROUP_CHAT_MESSAGES}/${chatEntity._id}`;
      }
 
      if (url) {
@@ -75,7 +77,7 @@ const ChatProvider = ({ children }) => {
      console.error("Error fetching chat messages:", error);
      setCurrentMessages([]); // Clear messages on error
    }
- }, []);
+ }, [selectedContact, selectedGroup]);
 
   return (
     <ChatContext.Provider

@@ -14,8 +14,7 @@ const SendMessageContainer = () => {
 
   const {user} = useAuthContext();
 
-  const { selectedContact, currentMessages, setCurrentMessages } =
-    useChatContext();
+  const { selectedContact, selectedGroup, setCurrentMessages } = useChatContext();
   const socket = useSocketContext();
 
   const handleEmojiClick = (emojiObject) => {
@@ -27,17 +26,21 @@ const SendMessageContainer = () => {
   };
 
   const handleSendMessage = () => {
-    if (message.trim() !== "" && selectedContact && socket) {
+    if (message.trim() !== "" && socket) {
       const newMessage = {
         content: message,
         sender: user.id,
-        recipient: selectedContact._id,
+        recipient: selectedContact ? selectedContact._id : null,
         type: "text",
-        group: selectedContact.isGroup ? selectedContact._id : null,
+        group: selectedGroup ? selectedGroup._id : null
       };
 
       // Emit the message to the server
-      socket.emit("sendMessage", newMessage);
+      if (newMessage.group) {
+        socket.emit("sendGroupMessage", newMessage); // Use a different event for group messages
+      } else {
+        socket.emit("sendMessage", newMessage); // Use the standard event for direct messages
+      }
 
       // Update the frontend state with the message as sent
       setCurrentMessages((prevMessages) => [
@@ -50,30 +53,6 @@ const SendMessageContainer = () => {
       setMessage("");
     }
   };
-
-  useEffect(() => {
-    if (socket) {
-      // Listen for the messageReceived event from the server
-      socket.on("messageReceived", (receivedMessage) => {
-        // Update the frontend state with the received message
-        if (
-          receivedMessage.recipient === selectedContact._id ||
-          receivedMessage.group === selectedContact._id
-        ) {
-          setCurrentMessages((prevMessages) => [
-            ...prevMessages,
-            receivedMessage,
-          ]);
-        }
-      });
-    }
-
-    return () => {
-      if (socket) {
-        socket.off("messageReceived");
-      }
-    };
-  }, [socket, selectedContact, setCurrentMessages]);
 
   const toggleEmojiPicker = () => {
     setShowEmojiPicker(!showEmojiPicker);

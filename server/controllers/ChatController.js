@@ -151,63 +151,6 @@ export const fetchGroupChatMessages = async (req, res) => {
 };
 
 
-export const sendMessage = async (req, res) => {
-  const { recipient, group, content } = req.body;
-  const file = req.file; // Multer middleware will handle file
-
-  try {
-    // Ensure at least one of recipient or group is provided
-    if (!recipient && !group) {
-      return res.status(400).json({ error: "Recipient or group is required" });
-    }
-
-    // Ensure content or file is provided
-    if (!content && !file) {
-      return res.status(400).json({ error: "Content or file is required" });
-    }
-
-    // Validate recipient or group
-    if (recipient) {
-      const userExists = await User.findById(recipient);
-      if (!userExists) {
-        return res.status(404).json({ error: "Recipient not found" });
-      }
-    }
-
-    if (group) {
-      const groupExists = await Group.findById(group);
-      if (!groupExists) {
-        return res.status(404).json({ error: "Group not found" });
-      }
-    }
-
-    // Create a new chat message
-    const newChat = new Chat({
-      sender: req.userId,
-      recipient,
-      group,
-      content,
-      file: file
-        ? {
-            url: file.path,
-            name: file.originalname,
-            type: file.mimetype,
-          }
-        : null,
-    });
-
-    await newChat.save();
-
-    res
-      .status(201)
-      .json({ message: "Message sent successfully", chat: newChat });
-  } catch (error) {
-    console.error("Error sending message:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-
 export const createGroup = async (req, res) => {
   try {
     const { name, description, members } = req.body;

@@ -29,9 +29,8 @@ const MessageTimestamp = styled(Typography)(({ issender }) => ({
 
 const Message = ({ message }) => {
   const {user} = useAuthContext();
-  console.log("Sender is: ");
-  console.log(message.sender);
-  const issender = String(message.sender._id) === String(user.id);
+  const senderId = message.sender._id ? message.sender._id : message.sender;
+  const issender = String(senderId) === String(user.id);
 
   return (
     <MessageContainer issender={issender}>

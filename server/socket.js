@@ -1,7 +1,6 @@
 import { Server as SocketIOServer } from "socket.io";
 import Chat from "./models/ChatModel.js";
 import Group from "./models/GroupModel.js";
-import User from "./models/UserModel.js"
 
 export const setupSocket = (server) => {
   const io = new SocketIOServer(server, {
@@ -29,8 +28,8 @@ export const setupSocket = (server) => {
 
     const createdMessage = await Chat.create(message);
     const messageData = await Chat.findById(createdMessage._id)
-      .populate("sender", "id email firstName lastName username image")
-      .populate("recipient", "id email firstName lastName username image");
+      .populate("sender", "id username image")
+      .populate("recipient", "id username image");
 
     if (recipientSocket) {
       io.to(recipientSocket).emit("receiveMessage", messageData);
@@ -122,7 +121,7 @@ export const setupSocket = (server) => {
   };
 
   const sendGroupMessage = async (message) => {
-    const group = await Group.findById(message.groupId).populate("members");
+    const group = await Group.findById(message.group).populate("members");
 
     if (!group) {
       return;
@@ -130,12 +129,11 @@ export const setupSocket = (server) => {
 
     const createdMessage = await Chat.create(message);
     const messageData = await Chat.findById(createdMessage._id)
-      .populate("sender", "id email firstName lastName username image")
-      .populate("groupId", "name");
-
+      .populate("sender", "id username image")
+      .populate("group", "id name");
     // Notify all members in the group
-    group.members.forEach((memberId) => {
-      const memberSocket = userMap.get(memberId.toString());
+    group.members.forEach((member) => {
+      const memberSocket = userMap.get(member._id.toString());
       if (memberSocket) {
         io.to(memberSocket).emit("receiveGroupMessage", messageData);
       }
@@ -152,10 +150,10 @@ export const setupSocket = (server) => {
     }
 
     socket.on("sendMessage", sendMessage);
+    socket.on("sendGroupMessage", sendGroupMessage);
     socket.on("createGroup", createGroup);
     socket.on("updateGroupInfo", updateGroupInfo);
     socket.on("deleteGroup", deleteGroup);
-    socket.on("sendGroupMessage", sendGroupMessage);
     socket.on("disconnect", () => disconnect(socket));
   });
 };

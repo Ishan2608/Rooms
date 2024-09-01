@@ -22,8 +22,7 @@ const chatSchema = new mongoose.Schema({
   },
   group: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Groups",
-    required: false,
+    ref: "Groups"
   },
   createdAt: {
     type: Date,

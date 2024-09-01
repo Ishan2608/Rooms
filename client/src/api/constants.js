@@ -21,20 +21,19 @@ export const CHAT_ROUTES = {
   ADD_TO_CONTACT: `${CHAT_ROOT}/contact`,
   GET_ALL_CONTACTS: `${CHAT_ROOT}/contacts`,
   DELETE_A_CONTACT: `${CHAT_ROOT}/contacts`,
-  FETCH_USER_CHAT_MESSAGES: `${CHAT_ROOT}/messages/user`,
-
+  
   CREATE_NEW_GROUP: `${CHAT_ROOT}/group`,
   GET_ALL_GROUPS: `${CHAT_ROOT}/groups`,
   FETCH_GROUP_INFO: `${CHAT_ROOT}/group/:groupId`,
   UPDATE_GROUP_INFO: `${CHAT_ROOT}/group`,
   DELETE_GROUP: `${CHAT_ROOT}/group/:groupId`,
   LEAVE_GROUP: `${CHAT_ROOT}/group/:groupId/leave`,
-  FETCH_GROUP_CHAT_MESSAGES: `${CHAT_ROOT}/messages/group/:groupId`,
-
-  SEND_MESSAGE: `${CHAT_ROOT}/message`,
-
-  FETCH_UNKNOWN_MESSAGES: `${CHAT_ROOT}/unknown/messages`,
-  FETCH_BLOCKED_CONTACTS: `${CHAT_ROOT}/blocked-contacts`,
+  
   BLOCK_USER: `${CHAT_ROOT}/block/:userId`,
   UNBLOCK_USER: `${CHAT_ROOT}/unblock/:userId`,
+
+  FETCH_USER_CHAT_MESSAGES: `${CHAT_ROOT}/messages/user`,
+  FETCH_GROUP_CHAT_MESSAGES: `${CHAT_ROOT}/messages/group`,
+  FETCH_UNKNOWN_MESSAGES: `${CHAT_ROOT}/unknown/messages`,
+  FETCH_BLOCKED_CONTACTS: `${CHAT_ROOT}/blocked-contacts`,
 };
