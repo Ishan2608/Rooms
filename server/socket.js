@@ -106,16 +106,16 @@ export const setupSocket = (server) => {
       }
 
       // Add new members
-      if (addMembers && Array.isArray(addMembers)) {
-        group.members = [...new Set([...group.members, ...addMembers])]; // Add members without duplicates
-      }
+      // if (addMembers && Array.isArray(addMembers)) {
+      //   group.members = [...new Set([...group.members, ...addMembers])];
+      // }
 
       // Remove members
-      if (removeMembers && Array.isArray(removeMembers)) {
-        group.members = group.members.filter(
-          (memberId) => !removeMembers.includes(memberId.toString())
-        );
-      }
+      // if (removeMembers && Array.isArray(removeMembers)) {
+      //   group.members = group.members.filter(
+      //     (memberId) => !removeMembers.includes(memberId.toString())
+      //   );
+      // }
 
       // Save updated group
       await group.save();

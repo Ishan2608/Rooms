@@ -51,7 +51,7 @@ const CloseButton = styled(IconButton)({
 const GroupInfo = ({ open, onClose }) => {
   const { user } = useAuthContext();
   const { selectedGroup, setSelectedGroup } = useChatContext();
-  const { socket } = useSocketContext();
+  const socket = useSocketContext();
 
   if (!selectedGroup) {
     return null;

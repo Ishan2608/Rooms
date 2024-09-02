@@ -15,12 +15,10 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useChatContext } from "../../context/ChatContext"; // Assuming this is where your global state is managed
 import { useSocketContext } from "../../context/SocketContext";
-import { CHAT_ROUTES } from "../../api/constants";
-import axios from "axios";
 
 const FormGroup = ({ onClose }) => {
   const { contacts, updateGroups, selectGroup } = useChatContext();
-  const {socket} = useSocketContext();
+  const socket = useSocketContext();
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedContacts, setSelectedContacts] = useState({});
   const [openSnackbar, setOpenSnackbar] = useState(false);
