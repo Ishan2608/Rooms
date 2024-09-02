@@ -55,12 +55,10 @@ export const setupSocket = (server) => {
     });
   };
 
-  const updateGroupInfo = async (groupData) => {
+  const updateGroupInfo = async (data) => {
     try {
-      const { groupId, name, description, addMembers, removeMembers } =
-        groupData;
-
-      const group = await Group.findById(groupId).populate("members");
+      const { id, name, description, imageFile } = data;
+      const group = await Group.findById(id).populate("members");
 
       if (!group) {
         return;
@@ -86,16 +84,54 @@ export const setupSocket = (server) => {
       await group.save();
 
       // Notify all members about the updated group info
-      group.members.forEach((memberId) => {
-        const memberSocket = userMap.get(memberId.toString());
+      group.members.forEach((member) => {
+        const memberSocket = userMap.get(member._id.toString());
         if (memberSocket) {
-          io.to(memberSocket).emit("groupUpdated", group);
+          io.to(memberSocket).emit("groupInfoUpdated", group);
         }
       });
     } catch (error) {
       console.error("Error handling updateGroupInfo event:", error);
     }
   };
+
+  const leaveGroup = async ({groupId, userId}) => {
+    try {
+      const group = await Group.findById(groupId);
+
+      if (!group) {
+        console.error("Group not found");
+        return;
+      }
+
+      // Remove the user from the group's members list
+      group.members = group.members.filter(
+        (member) => member.toString() !== userId.toString()
+      );
+
+      // Save the updated group
+      await group.save();
+
+      // Notify other members that a user has left the group
+      group.members.forEach((member) => {
+        const memberSocket = userMap.get(member._id.toString());
+        if (memberSocket) {
+          io.to(memberSocket).emit("groupMemberLeft", {
+            groupId,
+            userId,
+          });
+        }
+      });
+
+      // Notify the user that they have left the group
+      const userSocket = userMap.get(userId.toString());
+      if (userSocket) {
+        io.to(userSocket).emit("leftGroup", groupId);
+      }
+    } catch (error) {
+      console.error("Error handling leaveGroup event:", error);
+    }
+  }
 
   const deleteGroup = async (groupId) => {
     try {
@@ -153,6 +189,7 @@ export const setupSocket = (server) => {
     socket.on("sendGroupMessage", sendGroupMessage);
     socket.on("createGroup", createGroup);
     socket.on("updateGroupInfo", updateGroupInfo);
+    socket.on("leaveGroup", leaveGroup)
     socket.on("deleteGroup", deleteGroup);
     socket.on("disconnect", () => disconnect(socket));
   });

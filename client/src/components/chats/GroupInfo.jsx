@@ -20,6 +20,7 @@ import { CHAT_ROUTES } from "../../api/constants";
 import "../../index.css";
 import { green, red } from "@mui/material/colors";
 import { useAuthContext } from "../../context/AuthContext";
+import { useSocketContext } from "../../context/SocketContext";
 
 // Styled components
 const SliderContainer = styled(Box)({
@@ -48,6 +49,7 @@ const CloseButton = styled(IconButton)({
 const GroupInfo = ({ open, onClose }) => {
   const {user} = useAuthContext();
   const { selectedGroup, setSelectedGroup } = useChatContext();
+  const {socket} = useSocketContext();
 
   if (!selectedGroup) {
     return null;
@@ -82,7 +84,7 @@ const GroupInfo = ({ open, onClose }) => {
     setChanged(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!groupName.trim()) {
       setSnackbarType("error");
       setOpenSnackbar(true);
@@ -96,33 +98,100 @@ const GroupInfo = ({ open, onClose }) => {
       if (imageFile) {
         formData.append("image", imageFile);
       }
-      const updateGroupInfoUrl = `${CHAT_ROUTES.UPDATE_GROUP_INFO}/${selectedGroup._id}`;
 
-      const response = await axios.put(updateGroupInfoUrl, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      // Emit the update event via WebSocket
+      socket.emit("updateGroupInfo", {
+        id: selectedGroup._id,
+        name: groupName,
+        description: groupDescription,
+        image: imageFile,
       });
 
-      setSelectedGroup(response.data);
-      setSnackbarType("success");
+      // Listen for the server's acknowledgment and updated group data
+      socket.on("groupInfoUpdated", (updatedGroup) => {
+        setSelectedGroup(updatedGroup);
+        setSnackbarType("success");
+        setOpenSnackbar(true);
+      });
     } catch (error) {
       console.error("Error updating group info:", error);
       setSnackbarType("error");
+      setOpenSnackbar(true);
     }
-    setOpenSnackbar(true);
   };
 
-  const handleLeaveGroup = async () => {
-    console.log("Group will be Left.");
-  }
-  const handleDeleteGroup = async () => {
-    if (user.id === selectedGroup.admin._id){
-      console.log("Group will be deleted");
+
+  const handleLeaveGroup = () => {
+    if (!selectedGroup) return;
+
+    // Emit the leave group event to the server
+    socket.emit("leaveGroup", {
+      groupId: selectedGroup._id,
+      userId: user.id,
+    });
+
+    // Listen for the server's acknowledgment that the user left the group
+    socket.on("groupMemberLeft", ({ groupId, userId }) => {
+      if (groupId === selectedGroup._id) {
+        console.log(`User ${userId} left the group ${groupId}`);
+
+        // Update the global state to remove the group if the current user left
+        if (userId === user.id) {
+          updateGroups((prevGroups) =>
+            prevGroups.filter((group) => group._id !== groupId)
+          );
+          setSelectedGroup(null);
+          setCurrentMessages([]);
+          console.log("You have left the group.");
+        } else {
+          // If another member left, update the group members list
+          updateGroups((prevGroups) =>
+            prevGroups.map((group) =>
+              group._id === groupId
+                ? {
+                    ...group,
+                    members: group.members.filter(
+                      (member) => member._id !== userId
+                    ),
+                  }
+                : group
+            )
+          );
+        }
+      }
+    });
+  };
+
+  const handleDeleteGroup = () => {
+    if (!selectedGroup) return;
+
+    // Check if the user is the admin of the group
+    if (user.id === selectedGroup.admin._id) {
+      // Emit the delete group event to the server
+      socket.emit("deleteGroup", {
+        groupId: selectedGroup._id,
+      });
+
+      // Listen for the server's acknowledgment that the group was deleted
+      socket.on("groupDeleted", (groupId) => {
+        if (groupId === selectedGroup._id) {
+          console.log(`Group ${groupId} has been deleted`);
+
+          // Remove the group from the user's group list
+          updateGroups((prevGroups) =>
+            prevGroups.filter((group) => group._id !== groupId)
+          );
+
+          // Clear the selected group and messages
+          setSelectedGroup(null);
+          setCurrentMessages([]);
+          console.log("The group has been deleted.");
+        }
+      });
     } else {
       console.log("You are not authorized to delete the Group");
     }
-  }
+  };
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
