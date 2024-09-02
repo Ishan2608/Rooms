@@ -152,36 +152,6 @@ export const fetchGroupChatMessages = async (req, res) => {
 };
 
 
-export const createGroup = async (req, res) => {
-  try {
-    const { name, description, members } = req.body;
-    const admin = req.userId;
-
-    // Validate members
-    const validMembers = await User.find({ _id: { $in: members } });
-    if (validMembers.length !== members.length) {
-      return res.status(400).json({ message: "Some members are invalid" });
-    }
-
-    // Create new group
-    const newGroup = new Group({
-      name,
-      description,
-      admin,
-      members: [...members, admin], // Ensure admin is also added to the group
-    });
-
-    // Save the group
-    const savedGroup = await newGroup.save();
-
-    res.status(201).json(savedGroup);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-
 export const getGroups = async (req, res) => {
   try {
     const userId = req.userId;
