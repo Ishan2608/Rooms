@@ -1,27 +1,19 @@
-# Node.js
-node_modules/
-npm-debug.log
-.env
-
-# React (Vite)
-dist/
-*.local
-.vite/
-
-# Logs
-logs/
-*.log
-
 # OS-specific files
 .DS_Store
 Thumbs.db
 
 # Editor directories and files
-.vscode/
-.idea/
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 *.sublime-project
 *.sublime-workspace
-*.swp
 
 # Dependencies
 client/node_modules/
@@ -29,10 +21,22 @@ server/node_modules/
 
 # Build output
 client/dist/
+client/dist-ssr
+client/*.local
 server/dist/
 
 # Environment variables
 client/.env
 server/.env
 
+client/.gitignore
 server/public/
+
+# Logs
+client/logs
+client/*.log
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+client/pnpm-debug.log*
+client/lerna-debug.log*
