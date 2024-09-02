@@ -41,18 +41,25 @@ export const setupSocket = (server) => {
   };
 
   const createGroup = async (groupData) => {
-    const group = await Group.create(groupData);
-    const populatedGroup = await Group.findById(group._id)
-      .populate("admin", "id email firstName lastName username image")
-      .populate("members", "id email firstName lastName username image");
+    try {
+      // Create the new group in the database
+      const group = await Group.create(groupData);
 
-    // Notify all group members about the new group
-    groupData.members.forEach((memberId) => {
-      const memberSocket = userMap.get(memberId.toString());
-      if (memberSocket) {
-        io.to(memberSocket).emit("groupCreated", populatedGroup);
-      }
-    });
+      // Populate the necessary fields (admin and members)
+      const populatedGroup = await Group.findById(group._id)
+        .populate("admin", "id username image")
+        .populate("members", "id username image");
+
+      // Notify all group members about the new group
+      populatedGroup.members.forEach((member) => {
+        const memberSocket = userMap.get(member._id.toString());
+        if (memberSocket) {
+          io.to(memberSocket).emit("groupCreated", populatedGroup);
+        }
+      });
+    } catch (error) {
+      console.error("Error creating group:", error);
+    }
   };
 
   const updateGroupInfo = async (data) => {
