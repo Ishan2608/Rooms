@@ -39,19 +39,11 @@ const userSchema = new mongoose.Schema({
       ref: "Users",
     },
   ],
-  unknownMessages: [
+  unknownContacts: [
     {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
-        required: true,
-      },
-      messages: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Chats",
-        },
-      ],
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true,
     },
   ],
 });

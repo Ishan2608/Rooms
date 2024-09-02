@@ -26,20 +26,48 @@ export const setupSocket = (server) => {
   };
 
   const sendMessage = async (message) => {
-    const senderSocket = userMap.get(message.sender);
-    const recipientSocket = userMap.get(message.recipient);
+    try {
+      const senderSocket = userMap.get(message.sender);
+      const recipientSocket = userMap.get(message.recipient);
 
-    const createdMessage = await Chat.create(message);
-    const messageData = await Chat.findById(createdMessage._id)
-      .populate("sender", "id username image")
-      .populate("recipient", "id username image");
+      // Create and populate the message
+      const createdMessage = await Chat.create(message);
+      const messageData = await Chat.findById(createdMessage._id)
+        .populate("sender", "id username image")
+        .populate("recipient", "id username image");
 
-    if (recipientSocket) {
-      io.to(recipientSocket).emit("receiveMessage", messageData);
-    }
-    // Optionally, you can skip this to prevent the message from being sent back to the sender
-    if (senderSocket && senderSocket !== recipientSocket) {
-      io.to(senderSocket).emit("receiveMessage", messageData);
+      // Find the recipient user
+      const recipientUser = await User.findById(message.recipient);
+
+      // Check if the sender is in the recipient's contacts list
+      const isSenderInContacts = recipientUser.contacts.includes(
+        message.sender
+      );
+
+      if (!isSenderInContacts) {
+        // If sender is not in contacts, add to unknownContacts
+        if (!recipientUser.unknownContacts.includes(message.sender)) {
+          recipientUser.unknownContacts.push(message.sender);
+          await recipientUser.save();
+        }
+
+        // Emit to recipient about the unknown sender
+        if (recipientSocket) {
+          io.to(recipientSocket).emit("receiveUnknownMessage", messageData);
+        }
+      } else {
+        // Emit the message to the recipient if sender is known
+        if (recipientSocket) {
+          io.to(recipientSocket).emit("receiveMessage", messageData);
+        }
+      }
+
+      // Optionally, you can skip this to prevent the message from being sent back to the sender
+      if (senderSocket && senderSocket !== recipientSocket) {
+        io.to(senderSocket).emit("receiveMessage", messageData);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
