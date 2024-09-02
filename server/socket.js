@@ -1,9 +1,12 @@
 import { Server as SocketIOServer } from "socket.io";
 import Chat from "./models/ChatModel.js";
 import Group from "./models/GroupModel.js";
+import fs from "fs"
+
+var io;
 
 export const setupSocket = (server) => {
-  const io = new SocketIOServer(server, {
+  io = new SocketIOServer(server, {
     cors: {
       origin: process.env.ORIGIN,
       methods: ["GET", "POST"],
@@ -74,6 +77,33 @@ export const setupSocket = (server) => {
       // Update group details
       if (name) group.name = name;
       if (description) group.description = description;
+
+      if (imageFile) {
+        // Decode base64 string and save image
+        const base64Data = imageFile.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, "base64");
+        const fileName = `${new Date().getTime()}-group-image.png`; // Adjust extension as needed
+        const filePath = path.join(
+          __dirname,
+          "public",
+          "images",
+          "groups",
+          fileName
+        );
+
+        fs.writeFileSync(filePath, buffer);
+
+        // Delete old image if it exists
+        if (group.image) {
+          const oldImagePath = path.join(__dirname, "..", group.image);
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        }
+
+        // Save the new image path
+        group.image = `/images/groups/${fileName}`;
+      }
 
       // Add new members
       if (addMembers && Array.isArray(addMembers)) {
@@ -201,3 +231,5 @@ export const setupSocket = (server) => {
     socket.on("disconnect", () => disconnect(socket));
   });
 };
+
+export default io;

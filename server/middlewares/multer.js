@@ -16,4 +16,18 @@ const imageStorage = multer.diskStorage({
   },
 });
 
+const groupImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const folderPath = `./public/images/groups`;
+    fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
+    cb(null, folderPath);
+  },
+  filename: (req, file, cb) => {
+    const timestamp = new Date().getTime();
+    const fileName = `${timestamp}-${file.originalname}`;
+    cb(null, fileName);
+  },
+});
+
 export const imageUpload = multer({ storage: imageStorage });
+export const groupImageUpload = multer({ storage: groupImageStorage });

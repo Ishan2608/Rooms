@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/AuthMiddleware.js";
+import { groupImageUpload } from "../middlewares/multer.js";
 import {
   getAllUsers, addContact, getContacts, deleteContact,
   fetchUserChatMessages, fetchGroupChatMessages,
-  createGroup, getGroups, fetchGroupInfo, updateGroupInfo, leaveGroup, deleteGroup,
+  getGroups, fetchGroupInfo, updateGroupInfo,
   fetchUnknownMessages, addUnknownUserToContacts, blockUser, unblockUser, fetchBlockedContacts
 } from "../controllers/ChatController.js";
 
@@ -28,23 +29,14 @@ routes.get("/messages/user/:userId", verifyToken, fetchUserChatMessages);
 // Fetch messages for a specific group chat
 routes.get("/messages/group/:groupId", verifyToken, fetchGroupChatMessages);
 
-// Create a new group
-routes.post("/group", verifyToken, createGroup);
-
 // Update group info (name, description, or add/remove members)
-routes.put("/group/:groupId", verifyToken, updateGroupInfo);
+routes.put("/group/:groupId", verifyToken, groupImageUpload.single('image'), updateGroupInfo);
 
 // Fetch details info for a specific group
 routes.get("/group/:groupId", verifyToken, fetchGroupInfo);
 
 // Fetch all groups the user is a part of
 routes.get("/groups", verifyToken, getGroups);
-
-// Delete a group
-routes.delete("/group/:groupId", verifyToken, deleteGroup);
-
-// Leave a group (for a non-admin user)
-routes.post("/group/:groupId/leave", verifyToken, leaveGroup);
 
 // ---------------------------------------------------------------
 // Advanced Functionalities

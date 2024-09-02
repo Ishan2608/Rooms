@@ -1,6 +1,7 @@
 import User from "../models/UserModel.js";
 import Chat from "../models/ChatModel.js"
 import Group from "../models/GroupModel.js";
+import io from "../socket.js";
 
 // Fetch list of all users in the application (for search and add to contacts)
 export const getAllUsers = async (req, res) => {
@@ -217,117 +218,6 @@ export const fetchGroupInfo = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
-  }
-};
-
-export const updateGroupInfo = async (req, res) => {
-  try {
-    const groupId = req.params.groupId;
-    const { name, description, addMembers, removeMembers } = req.body;
-
-    // Find the group by ID
-    const group = await Group.findById(groupId);
-
-    if (!group) {
-      return res.status(404).json({ message: "Group not found" });
-    }
-
-    // Update the group info
-    if (name) group.name = name;
-    if (description) group.description = description;
-
-    // Add new members
-    if (addMembers && Array.isArray(addMembers)) {
-      // Validate and add members
-      const validMembers = await User.find({ _id: { $in: addMembers } });
-      if (validMembers.length) {
-        group.members = [...new Set([...group.members, ...addMembers])]; // Add members without duplicates
-      }
-    }
-
-    // Remove members
-    if (removeMembers && Array.isArray(removeMembers)) {
-      group.members = group.members.filter(
-        (memberId) => !removeMembers.includes(memberId.toString())
-      );
-    }
-
-    // Save updated group
-    await group.save();
-
-    res.status(200).json(group);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-export const leaveGroup = async (req, res) => {
-  try {
-    const { groupId } = req.params;
-    const userId = req.userId;
-
-    // Find the group
-    const group = await Group.findById(groupId);
-
-    // Check if the group exists
-    if (!group) {
-      return res.status(404).json({ message: "Group not found" });
-    }
-
-    // Check if the user is a member of the group
-    if (!group.members.includes(userId)) {
-      return res
-        .status(400)
-        .json({ message: "You are not a member of this group" });
-    }
-
-    // Remove user from the group's members list
-    group.members = group.members.filter(
-      (member) => member.toString() !== userId
-    );
-    await group.save();
-
-    // Optionally, you might want to update the user's groups list if you have such a field
-    await User.findByIdAndUpdate(userId, { $pull: { groups: groupId } });
-
-    return res
-      .status(200)
-      .json({ message: "You have left the group successfully" });
-  } catch (error) {
-    console.error("Error leaving group:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-
-export const deleteGroup = async (req, res) => {
-  try {
-    const { groupId } = req.params;
-    const userId = req.userId;
-
-    // Find the group
-    const group = await Group.findById(groupId).populate("admin");
-
-    // Check if the group exists
-    if (!group) {
-      return res.status(404).json({ message: "Group not found" });
-    }
-
-    // Check if the requester is the admin
-    if (group.admin._id.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Only the group admin can delete the group" });
-    }
-
-    // Delete the group
-    await Group.findByIdAndDelete(groupId);
-
-    return res.status(200).json({ message: "Group deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting group:", error);
-    return res.status(500).json({ message: "Server error" });
   }
 };
 

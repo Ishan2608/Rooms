@@ -1,26 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { 
-  IconButton, Button, Typography, Box, 
-  Avatar, TextField, Snackbar, Alert, Stack 
-} 
-from "@mui/material";
+import {
+  IconButton,
+  Button,
+  Typography,
+  Box,
+  Avatar,
+  TextField,
+  Snackbar,
+  Alert,
+  Stack,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import SendIcon from "@mui/icons-material/Send";
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 
-import axios from "axios";
-
-import ContactCard from "../contacts/ContactCard";
-import { useChatContext } from "../../context/ChatContext";
-import { CHAT_ROUTES } from "../../api/constants";
-
-import "../../index.css";
-import { green, red } from "@mui/material/colors";
 import { useAuthContext } from "../../context/AuthContext";
+import { useChatContext } from "../../context/ChatContext";
 import { useSocketContext } from "../../context/SocketContext";
+import ContactCard from "../contacts/ContactCard";
+
+import { green, red } from "@mui/material/colors";
 
 // Styled components
 const SliderContainer = styled(Box)({
@@ -47,9 +49,9 @@ const CloseButton = styled(IconButton)({
 });
 
 const GroupInfo = ({ open, onClose }) => {
-  const {user} = useAuthContext();
+  const { user } = useAuthContext();
   const { selectedGroup, setSelectedGroup } = useChatContext();
-  const {socket} = useSocketContext();
+  const { socket } = useSocketContext();
 
   if (!selectedGroup) {
     return null;
@@ -61,7 +63,9 @@ const GroupInfo = ({ open, onClose }) => {
   const [groupDescription, setGroupDescription] = useState(
     selectedGroup?.description || "Set a Description"
   );
-  const [groupImage, setGroupImage] = useState(selectedGroup?.image || `${selectedGroup.name}`);
+  const [groupImage, setGroupImage] = useState(
+    selectedGroup?.image || `${selectedGroup.name}`
+  );
   const [imageFile, setImageFile] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarType, setSnackbarType] = useState("success");
@@ -74,68 +78,16 @@ const GroupInfo = ({ open, onClose }) => {
     }, 500);
   }, [selectedGroup]);
 
-  const handleImageUpload = (event) => {
-    setChanged(true);
-    setImageFile(event.target.files[0]);
-  };
-
-  const handleDeleteImage = () => {
-    setGroupImage("");
-    setChanged(true);
-  };
-
-  const handleSave = () => {
-    if (!groupName.trim()) {
-      setSnackbarType("error");
+  useEffect(() => {
+    const handleGroupInfoUpdated = (updatedGroup) => {
+      setSelectedGroup(updatedGroup);
+      setSnackbarType("success");
       setOpenSnackbar(true);
-      return;
-    }
+    };
 
-    try {
-      const formData = new FormData();
-      formData.append("name", groupName);
-      formData.append("description", groupDescription);
-      if (imageFile) {
-        formData.append("image", imageFile);
-      }
-
-      // Emit the update event via WebSocket
-      socket.emit("updateGroupInfo", {
-        id: selectedGroup._id,
-        name: groupName,
-        description: groupDescription,
-        image: imageFile,
-      });
-
-      // Listen for the server's acknowledgment and updated group data
-      socket.on("groupInfoUpdated", (updatedGroup) => {
-        setSelectedGroup(updatedGroup);
-        setSnackbarType("success");
-        setOpenSnackbar(true);
-      });
-    } catch (error) {
-      console.error("Error updating group info:", error);
-      setSnackbarType("error");
-      setOpenSnackbar(true);
-    }
-  };
-
-
-  const handleLeaveGroup = () => {
-    if (!selectedGroup) return;
-
-    // Emit the leave group event to the server
-    socket.emit("leaveGroup", {
-      groupId: selectedGroup._id,
-      userId: user.id,
-    });
-
-    // Listen for the server's acknowledgment that the user left the group
-    socket.on("groupMemberLeft", ({ groupId, userId }) => {
+    const handleGroupMemberLeft = ({ groupId, userId }) => {
       if (groupId === selectedGroup._id) {
         console.log(`User ${userId} left the group ${groupId}`);
-
-        // Update the global state to remove the group if the current user left
         if (userId === user.id) {
           updateGroups((prevGroups) =>
             prevGroups.filter((group) => group._id !== groupId)
@@ -144,7 +96,6 @@ const GroupInfo = ({ open, onClose }) => {
           setCurrentMessages([]);
           console.log("You have left the group.");
         } else {
-          // If another member left, update the group members list
           updateGroups((prevGroups) =>
             prevGroups.map((group) =>
               group._id === groupId
@@ -159,34 +110,80 @@ const GroupInfo = ({ open, onClose }) => {
           );
         }
       }
+    };
+
+    const handleGroupDeleted = (groupId) => {
+      if (groupId === selectedGroup._id) {
+        console.log(`Group ${groupId} has been deleted`);
+        updateGroups((prevGroups) =>
+          prevGroups.filter((group) => group._id !== groupId)
+        );
+        setSelectedGroup(null);
+        setCurrentMessages([]);
+        console.log("The group has been deleted.");
+      }
+    };
+
+    socket.on("groupInfoUpdated", handleGroupInfoUpdated);
+    socket.on("groupMemberLeft", handleGroupMemberLeft);
+    socket.on("groupDeleted", handleGroupDeleted);
+
+    return () => {
+      socket.off("groupInfoUpdated", handleGroupInfoUpdated);
+      socket.off("groupMemberLeft", handleGroupMemberLeft);
+      socket.off("groupDeleted", handleGroupDeleted);
+    };
+  }, [selectedGroup, user.id, setSelectedGroup]);
+
+  const handleImageUpload = (event) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setGroupImage(reader.result);
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  };
+
+  const handleDeleteImage = () => {
+    setGroupImage("");
+  };
+
+  const handleSave = () => {
+    if (!groupName.trim()) {
+      setSnackbarType("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      const imageBase64 = imageFile ? imageFile.toString("base64") : "";
+      socket.emit("updateGroupInfo", {
+        id: selectedGroup._id,
+        name: groupName,
+        description: groupDescription,
+        imageFile: imageBase64,
+      });
+    } catch (error) {
+      console.error("Error updating group info:", error);
+      setSnackbarType("error");
+      setOpenSnackbar(true);
+    }
+  };
+
+  const handleLeaveGroup = () => {
+    if (!selectedGroup) return;
+
+    socket.emit("leaveGroup", {
+      groupId: selectedGroup._id,
+      userId: user.id,
     });
   };
 
   const handleDeleteGroup = () => {
     if (!selectedGroup) return;
 
-    // Check if the user is the admin of the group
     if (user.id === selectedGroup.admin._id) {
-      // Emit the delete group event to the server
       socket.emit("deleteGroup", {
         groupId: selectedGroup._id,
-      });
-
-      // Listen for the server's acknowledgment that the group was deleted
-      socket.on("groupDeleted", (groupId) => {
-        if (groupId === selectedGroup._id) {
-          console.log(`Group ${groupId} has been deleted`);
-
-          // Remove the group from the user's group list
-          updateGroups((prevGroups) =>
-            prevGroups.filter((group) => group._id !== groupId)
-          );
-
-          // Clear the selected group and messages
-          setSelectedGroup(null);
-          setCurrentMessages([]);
-          console.log("The group has been deleted.");
-        }
       });
     } else {
       console.log("You are not authorized to delete the Group");
@@ -196,7 +193,6 @@ const GroupInfo = ({ open, onClose }) => {
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
-
 
   return (
     <SliderContainer
@@ -233,7 +229,9 @@ const GroupInfo = ({ open, onClose }) => {
             alignItems: "center",
           }}
         >
-          <Avatar src={groupImage} alt={groupName}
+          <Avatar
+            src={groupImage}
+            alt={groupName}
             sx={{ width: 100, height: 100, mb: 1 }}
           />
           <Box>
@@ -254,7 +252,9 @@ const GroupInfo = ({ open, onClose }) => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             {isEditingName ? (
-              <TextField fullWidth value={groupName}
+              <TextField
+                fullWidth
+                value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
               />
             ) : (
@@ -269,14 +269,19 @@ const GroupInfo = ({ open, onClose }) => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="body1" sx={{ flexGrow: 1 }}>
             {isEditingDescription ? (
-              <TextField fullWidth multiline
+              <TextField
+                fullWidth
+                multiline
                 value={groupDescription}
                 onChange={(e) => setGroupDescription(e.target.value)}
               />
-              ) : ( groupDescription )
-            }
+            ) : (
+              groupDescription
+            )}
           </Typography>
-          <IconButton onClick={() => setIsEditingDescription(!isEditingDescription)} >
+          <IconButton
+            onClick={() => setIsEditingDescription(!isEditingDescription)}
+          >
             <EditIcon />
           </IconButton>
         </Box>
@@ -304,15 +309,19 @@ const GroupInfo = ({ open, onClose }) => {
           >
             Save
           </Button>
-          <Button 
-            variant="contained" color="error" startIcon={<LogoutIcon />}
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<LogoutIcon />}
             onClick={handleLeaveGroup}
           >
             Leave
           </Button>
-          <Button 
-            variant="contained" color="error" startIcon={<DeleteIcon />}
-            disabled={user.id != selectedGroup.admin._id}
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<DeleteIcon />}
+            disabled={user.id !== selectedGroup.admin._id}
             onClick={handleDeleteGroup}
           >
             Delete

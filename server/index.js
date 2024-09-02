@@ -37,6 +37,12 @@ app.use(
   express.static(path.join(__dirname, "public/images/users"))
 );
 
+app.use(
+  "/images/groups",
+  express.static(path.join(__dirname, "public/images/groups"))
+);
+
+
 app.use("/api/auth", authRoutes);
 app.use("/api/chats", chatRoutes);
 

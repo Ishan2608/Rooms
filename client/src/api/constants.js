@@ -22,12 +22,8 @@ export const CHAT_ROUTES = {
   GET_ALL_CONTACTS: `${CHAT_ROOT}/contacts`,
   DELETE_A_CONTACT: `${CHAT_ROOT}/contacts`,
   
-  CREATE_NEW_GROUP: `${CHAT_ROOT}/group`,
   GET_ALL_GROUPS: `${CHAT_ROOT}/groups`,
   FETCH_GROUP_INFO: `${CHAT_ROOT}/group/:groupId`,
-  UPDATE_GROUP_INFO: `${CHAT_ROOT}/group`,
-  DELETE_GROUP: `${CHAT_ROOT}/group/:groupId`,
-  LEAVE_GROUP: `${CHAT_ROOT}/group/:groupId/leave`,
   
   BLOCK_USER: `${CHAT_ROOT}/block/:userId`,
   UNBLOCK_USER: `${CHAT_ROOT}/unblock/:userId`,
