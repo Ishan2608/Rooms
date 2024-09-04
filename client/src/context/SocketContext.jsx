@@ -43,7 +43,6 @@ export const SocketProvider = ({ children }) => {
             if (!messageExists && message.sender._id !== user.id) {
               return [...prevMessages, message];
             }
-
             return prevMessages;
           });
         }

@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/AuthMiddleware.js";
+import { fileUpload } from "../middlewares/multer.js";
 import {
   getAllUsers, addContact, getContacts, deleteContact,
   fetchUserChatMessages, fetchGroupChatMessages,
   getGroups, fetchGroupInfo,
-  fetchUnknownMessages, fetchBlockedContacts
+  fetchUnknownMessages, fetchBlockedContacts,
+  handleFileMessage
 } from "../controllers/ChatController.js";
 
 
@@ -33,6 +35,15 @@ routes.get("/group/:groupId", verifyToken, fetchGroupInfo);
 
 // Fetch all groups the user is a part of
 routes.get("/groups", verifyToken, getGroups);
+
+routes.put(
+  "/fileMessage",
+  verifyToken,
+  fileUpload.single("file"),
+  handleFileMessage
+);
+
+
 
 // ---------------------------------------------------------------
 // Advanced Functionalities

@@ -1,7 +1,9 @@
 import User from "../models/UserModel.js";
 import Chat from "../models/ChatModel.js"
 import Group from "../models/GroupModel.js";
-import io from "../socket.js";
+import { getSocketInstance, getUserSocket } from "../socket.js";
+
+const io = getSocketInstance();
 
 // Fetch list of all users in the application (for search and add to contacts)
 export const getAllUsers = async (req, res) => {
@@ -188,6 +190,55 @@ export const fetchGroupInfo = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const handleFileMessage = async (req, res) => {
+  try {
+    const { recipient, group} = req.body;
+    const sender = req.userId;
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const fileUrl = `/chat_files/${req.file.filename}`;
+
+    const messageData = {
+      sender,
+      file: fileUrl,
+      ...(recipient && { recipient }),
+      ...(group && { group }),
+    };
+
+    const createdMessage = await Chat.create(messageData);
+
+    const populatedMessage = await Chat.findById(createdMessage._id)
+      .populate("sender", "id username image")
+      .populate("recipient", "id username image")
+      .populate("group", "id name");
+
+    if (recipient) {
+      const recipientSocket = getUserSocket(recipient);
+
+      if (recipientSocket) {
+        io.to(recipientSocket).emit("receiveMessage", populatedMessage);
+      }
+    } else if (group) {
+      const groupMembers = await Group.findById(group).populate("members");
+
+      groupMembers.members.forEach((member) => {
+        const memberSocket = io.getUserSocket(member._id.toString());
+        if (memberSocket) {
+          io.to(memberSocket).emit("receiveGroupMessage", populatedMessage);
+        }
+      });
+    }
+
+    return res.status(200).json(populatedMessage);
+  } catch (error) {
+    console.error("Error handling file message:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 

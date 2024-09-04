@@ -4,6 +4,7 @@ import Group from "./models/GroupModel.js";
 import fs from "fs"
 
 var io;
+const userMap = new Map();
 
 export const setupSocket = (server) => {
   io = new SocketIOServer(server, {
@@ -13,17 +14,6 @@ export const setupSocket = (server) => {
       credentials: true,
     },
   });
-
-  const userMap = new Map();
-
-  const disconnect = (socket) => {
-    for (const [userId, socketId] of userMap.entries()) {
-      if (socketId === socket.id) {
-        userMap.delete(userId);
-        break;
-      }
-    }
-  };
 
   const sendMessage = async (message) => {
     try {
@@ -241,6 +231,15 @@ export const setupSocket = (server) => {
     });
   };
 
+  const disconnect = (socket) => {
+    for (const [userId, socketId] of userMap.entries()) {
+      if (socketId === socket.id) {
+        userMap.delete(userId);
+        break;
+      }
+    }
+  };
+
   io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId;
 
@@ -258,6 +257,17 @@ export const setupSocket = (server) => {
     socket.on("deleteGroup", deleteGroup);
     socket.on("disconnect", () => disconnect(socket));
   });
+
+  return io;
+
 };
 
-export default io;
+export const getSocketInstance = () => io;
+
+// **Export function to get user's socket ID**
+export const getUserSocket = (userId) => {
+  return userMap.get(userId);
+};
+
+// **Export io and userMap for potential future use**
+export { io, userMap };
