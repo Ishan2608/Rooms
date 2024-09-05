@@ -13,28 +13,25 @@ import axios from "axios";
 import { CHAT_ROUTES } from "../../api/constants";
 
 const FromUnknownsList = () => {
-  const {
-    unknownMessages,
-    updateUnknownMessages
-  } = useChatContext(); // Access global state
+  const { unknownContacts, selectContact, updateUnknownContacts } = useChatContext();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
-    const fetchUnknownMessages = async () => {
+    const fetchUnknownContacts = async () => {
       try {
-        const response = await axios.get(CHAT_ROUTES.FETCH_UNKNOWN_MESSAGES, {
+        const response = await axios.get(CHAT_ROUTES.FETCH_UNKNOWN_USERS, {
           withCredentials: true,
         });
-        updateUnknownMessages(response.data);
+        setLoading(false);
+        updateUnknownContacts(response.data);
       } catch (error) {
-        console.error("Error fetching unknown messages:", error);
+        setLoading(false);
+        console.error("Error fetching unknown users:", error);
       }
     };
 
-    fetchUnknownMessages();
-    
-  }, [updateUnknownMessages]);
+    fetchUnknownContacts();
+  }, [updateUnknownContacts]);
 
   const handleContactClick = (contact) => {
     selectContact(contact);
@@ -60,13 +57,13 @@ const FromUnknownsList = () => {
         >
           <Box>
             {loading ? (
-              <Typography variant="body1">Loading contacts...</Typography>
-            ) : unknownMessages.length === 0 ? (
+              <Typography variant="body1"> Loading... </Typography>
+            ) : unknownContacts.length === 0 ? (
               <Typography variant="body1">
                 No messages from unknown users.
               </Typography>
             ) : (
-              unknownMessages.map((message) => (
+              unknownContacts.map((message) => (
                 <ContactCard
                   key={message._id}
                   image={message.sender.image}

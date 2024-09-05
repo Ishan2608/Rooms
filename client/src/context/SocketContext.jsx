@@ -16,9 +16,10 @@ export const SocketProvider = ({ children }) => {
   const {
     selectedContact,
     selectedGroup,
-    setCurrentMessages,
-    updateGroups,
     selectGroup,
+    updateGroups,
+    setCurrentMessages,
+    setUnknownContacts,
   } = useChatContext();
 
   useEffect(() => {
@@ -48,6 +49,32 @@ export const SocketProvider = ({ children }) => {
         }
       };
 
+      const handleReceiveUnknownMessage = (message) => {
+        // 1. Add the sender to the list of unknownContacts if not already present
+        setUnknownContacts((prevContacts) => {
+          const contactExists = prevContacts.some(
+            (contact) => contact._id === message.sender._id
+          );
+          if (!contactExists) {
+            return [...prevContacts, message.sender];
+          }
+          return prevContacts;
+        });
+
+        // 2. If the sender is the selected contact, update the currentMessages
+        setCurrentMessages((prevMessages) => {
+          // Check if the message already exists in the currentMessages
+          const messageExists = prevMessages.some(
+            (msg) => msg._id === message._id
+          );
+          if (!messageExists) {
+            return [...prevMessages, message];
+          }
+          return prevMessages;
+        });
+      };
+
+
       const handleReceiveGroupMessage = (message) => {
         // Ensure that the message is only handled if it comes from the selected group
         if (selectedGroup && message.group._id === selectedGroup._id) {
@@ -70,7 +97,6 @@ export const SocketProvider = ({ children }) => {
           });
         }
       };
-
 
       const handleGroupCreated = (group) => {
         updateGroups((prevGroups) => [...prevGroups, group]);
@@ -96,6 +122,7 @@ export const SocketProvider = ({ children }) => {
 
       socket.current.on("receiveMessage", handleReceiveMessage);
       socket.current.on("receiveGroupMessage", handleReceiveGroupMessage);
+      socket.current.on("receiveUnknownMessage", handleReceiveUnknownMessage);
       socket.current.on("groupCreated", handleGroupCreated);
       socket.current.on("groupUpdated", handleGroupUpdated);
       socket.current.on("groupDeleted", handleGroupDeleted);

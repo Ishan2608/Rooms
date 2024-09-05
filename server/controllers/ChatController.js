@@ -251,19 +251,19 @@ export const fetchUnknownMessages = async (req, res) => {
     // Find the user by ID and populate the unknownMessages field
     const user = await User.findById(userId)
       .populate({
-        path: "unknownMessages.user",
-        select: "username firstName lastName",
+        path: "unknownContacts.user",
+        select: "id username image",
       })
       .populate({
-        path: "unknownMessages.messages",
-        select: "content createdAt",
+        path: "unknownContacts.messages",
+        select: "id sender recipient content file createdAt",
       });
 
-    if (!user || !user.unknownMessages.length) {
+    if (!user || !user.unknownContacts.length) {
       return res.status(404).json({ message: "No unknown messages found" });
     }
 
-    res.status(200).json(user.unknownMessages);
+    res.status(200).json(user.unknownContacts);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

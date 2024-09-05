@@ -28,6 +28,10 @@ export const setupSocket = (server) => {
 
       // Find the recipient user
       const recipientUser = await User.findById(message.recipient);
+      if (!recipientUser) {
+        console.error("Recipient user not found");
+        return;
+      }
 
       // Check if the sender is in the recipient's contacts list
       const isSenderInContacts = recipientUser.contacts.includes(
@@ -36,6 +40,7 @@ export const setupSocket = (server) => {
 
       if (!isSenderInContacts) {
         // If sender is not in contacts, add to unknownContacts
+
         if (!recipientUser.unknownContacts.includes(message.sender)) {
           recipientUser.unknownContacts.push(message.sender);
           await recipientUser.save();

@@ -21,7 +21,7 @@ const ChatProvider = ({ children }) => {
   const [contacts, setContacts] = useState([]);
   const [groups, setGroups] = useState([]);
   const [currentMessages, setCurrentMessages] = useState([]);
-  const [unknownMessages, setUnknownMessages] = useState([]);
+  const [unknownContacts, setUnknownContacts] = useState([]);
   const [blockedUsers, setBlockedUsers] = useState([]);
 
   const selectContact = useCallback((contact) => {
@@ -44,8 +44,8 @@ const ChatProvider = ({ children }) => {
     setGroups(newGroups);
   }, []);
 
-  const updateUnknownMessages = useCallback((newUnknownMessages) => {
-    setUnknownMessages(newUnknownMessages);
+  const updateUnknownContacts = useCallback((newUnknownContacts) => {
+    setUnknownContacts(newUnknownContacts);
   }, []);
 
   const updateBlockedUsers = useCallback((newBlockedUsers) => {
@@ -87,15 +87,16 @@ const ChatProvider = ({ children }) => {
         groups,
         selectedGroup,
         currentMessages,
-        unknownMessages,
+        unknownContacts,
         blockedUsers,
         setContacts,
+        setUnknownContacts,
         setBlockedUsers,
         selectContact,
         selectGroup,
         updateContacts,
+        updateUnknownContacts,
         updateGroups,
-        updateUnknownMessages,
         updateBlockedUsers,
         setCurrentMessages,
         fetchChatMessages
