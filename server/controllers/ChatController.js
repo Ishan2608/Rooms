@@ -228,7 +228,7 @@ export const handleFileMessage = async (req, res) => {
       const groupMembers = await Group.findById(group).populate("members");
 
       groupMembers.members.forEach((member) => {
-        const memberSocket = io.getUserSocket(member._id.toString());
+        const memberSocket = getUserSocket(member._id.toString());
         if (memberSocket) {
           io.to(memberSocket).emit("receiveGroupMessage", populatedMessage);
         }
