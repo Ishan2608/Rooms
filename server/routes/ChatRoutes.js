@@ -7,7 +7,8 @@ import {
   getGroups, fetchGroupInfo,
   fetchUnknownMessages, fetchBlockedContacts,
   handleFileMessage,
-  addUnknownUserToContacts
+  addUnknownUserToContacts,
+  blockUser
 } from "../controllers/ChatController.js";
 
 
@@ -53,9 +54,16 @@ routes.put(
 // Fetch all unknown messages (messages from users not in contacts)
 routes.get("/unknown-messages", verifyToken, fetchUnknownMessages);
 
+// Add an unknown user to contact, from which you have received a message
 routes.post("/add-unknown-to-contacts/:userId", verifyToken, addUnknownUserToContacts);
 
 // Fetch all blocked contacts
 routes.get("/blocked-contacts", verifyToken, fetchBlockedContacts);
+
+// block a user
+routes.post("/block-user/:userId", verifyToken, blockUser);
+
+// unblock a user
+routes.post("/unblock-user/:userId", verifyToken, blockUser);
 
 export default routes;

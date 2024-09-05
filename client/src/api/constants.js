@@ -29,6 +29,8 @@ export const CHAT_ROUTES = {
   FETCH_GROUP_CHAT_MESSAGES: `${CHAT_ROOT}/messages/group`,
 
   ADD_UNKNOWN_TO_CONTACTS: `${CHAT_ROOT}/add-unknown-to-contacts`,
+  BLOCK_USER: `${CHAT_ROOT}/block-user`,
+  UNBLOCK_USER: `${CHAT_ROOT}/unblock-user`,
   FETCH_UNKNOWN_CONTACTS: `${CHAT_ROOT}/unknown-messages`,
   FETCH_BLOCKED_CONTACTS: `${CHAT_ROOT}/blocked-contacts`,
 };
