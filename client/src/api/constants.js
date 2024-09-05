@@ -28,6 +28,6 @@ export const CHAT_ROUTES = {
   FETCH_USER_CHAT_MESSAGES: `${CHAT_ROOT}/messages/user`,
   FETCH_GROUP_CHAT_MESSAGES: `${CHAT_ROOT}/messages/group`,
 
-  FETCH_UNKNOWN_MESSAGES: `${CHAT_ROOT}/unknown-messages`,
+  FETCH_UNKNOWN_CONTACTS: `${CHAT_ROOT}/unknown-messages`,
   FETCH_BLOCKED_CONTACTS: `${CHAT_ROOT}/blocked-contacts`,
 };

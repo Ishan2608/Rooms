@@ -31,7 +31,7 @@ const ChatsHeader = () => {
     selectContact,
     selectGroup,
     setContacts,
-    unknownMessages,
+    unknownContacts,
     blockUser,
     addUnknownToContacts,
   } = useChatContext();
@@ -134,7 +134,7 @@ const ChatsHeader = () => {
 
   const isUnknownUser =
     selectedContact &&
-    unknownMessages.some((msg) => msg.sender === selectedContact._id);
+    unknownContacts.some((msg) => msg.sender === selectedContact._id);
 
   return (
     <>

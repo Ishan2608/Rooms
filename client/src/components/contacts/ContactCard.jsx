@@ -20,11 +20,12 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
 }));
 
 const ContactCard = ({ username, fullName, image, onClick }) => {
+  const imageURL = `http://localhost:8747${image}`;
   return (
     <StyledCard onClick={onClick}>
       {image && (
         <Tooltip title={username}>
-          <StyledAvatar src={image} alt={username} />
+          <StyledAvatar src={imageURL} alt={username} />
         </Tooltip>
       )}
       <CardContent>

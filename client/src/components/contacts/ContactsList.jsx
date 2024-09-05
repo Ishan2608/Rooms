@@ -74,7 +74,7 @@ const ContactsList = () => {
               contacts.map((contact) => (
                 <ContactCard
                   key={contact._id}
-                  image={`http://localhost:8747${contact.image}`}
+                  image={contact.image}
                   username={contact.username}
                   fullName={truncateFullName(
                     contact.firstName,

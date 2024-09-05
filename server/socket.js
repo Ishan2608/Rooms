@@ -1,6 +1,7 @@
 import { Server as SocketIOServer } from "socket.io";
 import Chat from "./models/ChatModel.js";
 import Group from "./models/GroupModel.js";
+import User from "./models/UserModel.js"
 import fs from "fs"
 
 var io;

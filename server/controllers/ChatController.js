@@ -159,7 +159,7 @@ export const getGroups = async (req, res) => {
     const userId = req.userId;
 
     // Find all groups where the user is a member
-    const groups = await Group.find({ members: userId }).populate("admin", "username").populate("members", "username");
+    const groups = await Group.find({ members: userId }).populate("admin", "id username image").populate("members", "id username image");
 
     if (!groups.length) {
       return res.status(404).json({ message: "No groups found" });
@@ -250,14 +250,10 @@ export const fetchUnknownMessages = async (req, res) => {
 
     // Find the user by ID and populate the unknownMessages field
     const user = await User.findById(userId)
-      .populate({
-        path: "unknownContacts.user",
-        select: "id username image",
-      })
-      .populate({
-        path: "unknownContacts.messages",
-        select: "id sender recipient content file createdAt",
-      });
+      .populate(
+        "unknownContacts",
+        "id firstName lastName username image",
+      )
 
     if (!user || !user.unknownContacts.length) {
       return res.status(404).json({ message: "No unknown messages found" });

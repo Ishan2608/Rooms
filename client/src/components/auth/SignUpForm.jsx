@@ -79,11 +79,6 @@ const SignUpForm = () => {
       setAlertMsg("Email not specified");
       return false;
     }
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setAlertMsg("Email not Valid");
-      setSeverity("error");
-      return false;
-    }
     if (form.firstName === "") {
       setSeverity("error");
       setAlertMsg("First name not defined");

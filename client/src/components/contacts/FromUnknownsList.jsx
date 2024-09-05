@@ -19,7 +19,7 @@ const FromUnknownsList = () => {
   useEffect(() => {
     const fetchUnknownContacts = async () => {
       try {
-        const response = await axios.get(CHAT_ROUTES.FETCH_UNKNOWN_USERS, {
+        const response = await axios.get(CHAT_ROUTES.FETCH_UNKNOWN_CONTACTS, {
           withCredentials: true,
         });
         setLoading(false);
@@ -63,12 +63,12 @@ const FromUnknownsList = () => {
                 No messages from unknown users.
               </Typography>
             ) : (
-              unknownContacts.map((message) => (
+              unknownContacts.map((contact) => (
                 <ContactCard
-                  key={message._id}
-                  image={message.sender.image}
-                  username={message.sender.username}
-                  onClick={() => handleContactClick(message.sender)}
+                  key={contact._id}
+                  image={contact.image}
+                  username={contact.username}
+                  onClick={() => handleContactClick(contact)}
                 />
               ))
             )}

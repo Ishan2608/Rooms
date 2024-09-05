@@ -50,13 +50,12 @@ const Profile = () => {
   };
 
   const validateForm = () => {
-    const { firstName, lastName, email, username, password } = userData;
+    const { firstName, lastName, email, username} = userData;
     const isValid =
       firstName &&
       lastName &&
       email &&
-      username &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      username
     return isValid;
   };
   const handleLogOut = async () => {

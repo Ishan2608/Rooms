@@ -31,7 +31,6 @@ const Message = ({ message }) => {
   const {user} = useAuthContext();
   const senderId = message.sender._id ? message.sender._id : message.sender;
   const issender = String(senderId) === String(user.id);
-
   return (
     <MessageContainer issender={issender}>
       <MessageBubble issender={issender}>
