@@ -32,8 +32,9 @@ const ChatsHeader = () => {
     selectGroup,
     setContacts,
     unknownContacts,
-    blockUser,
-    addUnknownToContacts,
+    blockedUsers,
+    setBlockedUsers,
+    setUnknownContacts,
   } = useChatContext();
 
   const displayName = selectedContact
@@ -74,43 +75,62 @@ const ChatsHeader = () => {
     setGroupInfoOpen(false);
   };
 
-  const handleDeleteContact = async () => {
+  // Add unknown user to contacts
+  const handleAddUnknownToContacts = async () => {
     try {
       if (!selectedContact) return;
-      const url = `${CHAT_ROUTES.DELETE_A_CONTACT}/${selectedContact._id}`;
-      const response = await axios.delete(url, { withCredentials: true });
+
+      const url = `${CHAT_ROUTES.ADD_UNKNOWN_TO_CONTACTS}/${selectedContact._id}`;
+      const response = await axios.post(url, {}, { withCredentials: true });
 
       if (response.status === 200) {
-        console.log("Contact deleted successfully:", response.data);
+        console.log("User added to contacts successfully:", response.data);
 
-        // Fetch the updated contact list
+        // Update contacts
         const updatedContactsResponse = await axios.get(
           CHAT_ROUTES.GET_ALL_CONTACTS,
           { withCredentials: true }
         );
-
         setContacts(updatedContactsResponse.data);
-        selectContact(null);
+
+        // Remove user from unknown contacts
+        setUnknownContacts((prev) =>
+          prev.filter((user) => user._id !== selectedContact._id)
+        );
       } else {
         console.error(
-          "Failed to delete contact. Status code:",
+          "Failed to add user to contacts. Status:",
           response.status
         );
       }
     } catch (error) {
-      console.error("Error deleting contact:", error);
+      console.error("Error adding user to contacts:", error);
     } finally {
       handleMenuClose();
     }
   };
 
+  // Block a user
   const handleBlockUser = async () => {
     try {
       if (!selectedContact) return;
 
-      await blockUser(selectedContact._id);
+      const url = `${CHAT_ROUTES.BLOCK_USER}/${selectedContact._id}`;
+      const response = await axios.post(url, {}, { withCredentials: true });
 
-      selectContact(null);
+      if (response.status === 200) {
+        console.log("User blocked successfully:", response.data);
+
+        // Update blocked users
+        setBlockedUsers((prev) => [...prev, selectedContact]);
+
+        // Remove user from unknown contacts
+        setUnknownContacts((prev) =>
+          prev.filter((user) => user.sender !== selectedContact._id)
+        );
+      } else {
+        console.error("Failed to block user. Status:", response.status);
+      }
     } catch (error) {
       console.error("Error blocking user:", error);
     } finally {
@@ -118,23 +138,9 @@ const ChatsHeader = () => {
     }
   };
 
-  const handleAddUnknownToContacts = async () => {
-    try {
-      if (!selectedContact) return;
-
-      await addUnknownToContacts(selectedContact._id);
-
-      selectContact(null);
-    } catch (error) {
-      console.error("Error adding unknown user to contacts:", error);
-    } finally {
-      handleMenuClose();
-    }
-  };
-
   const isUnknownUser =
     selectedContact &&
-    unknownContacts.some((msg) => msg.sender === selectedContact._id);
+    unknownContacts.some((user) => user._id === selectedContact._id); // Adjusted comparison
 
   return (
     <>
@@ -192,13 +198,6 @@ const ChatsHeader = () => {
               ]
             ) : (
               [
-                <MenuItem
-                  key="delete-contact"
-                  onClick={handleDeleteContact}
-                  sx={{ color: "red" }}
-                >
-                  Delete Contact
-                </MenuItem>,
                 <MenuItem
                   key="block-contact"
                   onClick={handleBlockUser}

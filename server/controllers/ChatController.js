@@ -268,36 +268,46 @@ export const fetchUnknownMessages = async (req, res) => {
 
 export const addUnknownUserToContacts = async (req, res) => {
   try {
-    const userId = req.userId;
-    const unknownUserId = req.params.userId;
+    const userId = req.userId; // ID of the current user making the request
+    const contactId = req.params.userId; // ID of the unknown user to be added as a contact
 
-    // Find the user
+    // Find the current user
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "Current user not found" });
+    }
+
+    // Check if the unknown user exists
+    const newContact = await User.findById(contactId);
+    if (!newContact) {
+      return res.status(404).json({ message: "Unknown user not found" });
     }
 
     // Check if the unknown user is already in contacts
-    if (user.contacts.includes(unknownUserId)) {
-      return res.status(400).json({ message: "User is already in contacts" });
+    if (user.contacts.includes(contactId)) {
+      return res
+        .status(400)
+        .json({ message: "User is already in your contacts" });
     }
 
     // Add the unknown user to contacts
-    user.contacts.push(unknownUserId);
+    user.contacts.push(contactId);
 
-    // Remove from unknownMessages
-    user.unknownMessages = user.unknownMessages.filter(
-      (message) => message.user.toString() !== unknownUserId
+    // Remove the user from unknownMessages (if exists)
+    user.unknownContacts = user.unknownContacts.filter(
+      (contact) => contact._id.toString() !== contactId
     );
 
+    // Save the updated user
     await user.save();
 
-    res.status(200).json({ message: "User added to contacts" });
+    res.status(200).json({ message: "User successfully added to contacts" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error in adding unknown user to contacts:", error);
+    res.status(500).json({ message: "Server error, please try again later" });
   }
 };
+
 
 export const fetchBlockedContacts = async (req, res) => {
   try {

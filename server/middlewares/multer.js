@@ -16,12 +16,14 @@ const fileStorage = multer.diskStorage({
 });
 
 // Export the multer middleware for file uploads
-export const fileUpload = multer({ storage: fileStorage });
+export const fileUpload = multer({
+  storage: fileStorage,
+  limits: { fieldSize: 25 * 1024 * 1024 },
+});
 
 // Configure multer (can be moved to a separate file for better organization)
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const userId = req.userId || "default";
     const folderPath = `./public/images/users`;
     fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
     cb(null, folderPath);
@@ -33,4 +35,7 @@ const imageStorage = multer.diskStorage({
   },
 });
 
-export const imageUpload = multer({ storage: imageStorage });
+export const imageUpload = multer({
+  storage: imageStorage,
+  limits: { fieldSize: 25 * 1024 * 1024 },
+});

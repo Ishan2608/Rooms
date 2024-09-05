@@ -177,13 +177,14 @@ export const updateProfileInfo = async (req, res, next) => {
 
     // Update image if provided
     if (req.file) {
+      console.log(req.file.filename);
       // Delete old image if it exists
       const oldImagePath = user.image; // Old image path in the database
       deleteOldImage(oldImagePath);
 
       // Save new image
-      const folderPath = `/images/users`;
-      const imageUrl = `${folderPath}/${req.file.filename}`;
+      const timestamp = new Date().getTime();
+      const imageUrl = `/images/users/${timestamp}-${req.file.filename}`;
       user.image = imageUrl;
     }
 

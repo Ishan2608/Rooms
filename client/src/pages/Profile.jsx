@@ -36,6 +36,7 @@ const Profile = () => {
     password: "",
   }));
 
+
   // State for the profile picture and Snackbar
   const [profilePic, setProfilePic] = useState(userData.image);
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -85,6 +86,7 @@ const Profile = () => {
 
         if (response.status === 200) {
           setUser(response.data);
+          console.log(response.data);
           setSnackbarType("success");
         } else {
           setSnackbarType("error");
