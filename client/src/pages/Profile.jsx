@@ -9,7 +9,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { deepPurple, green, red } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
-import { API_ROUTES } from "../api/constants";
+import { API_ROUTES, HOST } from "../api/constants";
 import axios from "axios"
 
 import "../index.css"
@@ -31,7 +31,7 @@ const Profile = () => {
     email: user?.email || "",
     username: user?.username || "",
     image: user?.image
-      ? `http://localhost:8747${user.image}`
+      ? `${HOST}${user.image}`
       : "",
     password: "",
   }));

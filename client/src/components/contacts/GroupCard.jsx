@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, Avatar, Typography, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { HOST } from "../../api/constants";
 
 // Styled components for consistent design
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -24,7 +25,7 @@ const GroupCard = ({ name, image, onClick }) => {
   return (
     <StyledCard onClick={onClick}>
       <Tooltip title={name}>
-        <StyledAvatar src={image} alt={name} />
+        <StyledAvatar src={`${HOST}${image}`} alt={name} />
       </Tooltip>
       <CardContent>
         <Typography variant="body1" noWrap>

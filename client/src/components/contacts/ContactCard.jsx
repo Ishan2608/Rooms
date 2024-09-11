@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, Avatar, Typography, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { HOST } from "../../api/constants";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   display: "flex",
@@ -20,7 +21,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
 }));
 
 const ContactCard = ({ username, fullName, image, onClick }) => {
-  const imageURL = `http://localhost:8747${image}`;
+  const imageURL = `${HOST}${image}`;
   return (
     <StyledCard onClick={onClick}>
       {image && (

@@ -13,6 +13,7 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import SearchContacts from "./SearchContacts"; // Import the SearchContacts modal
 import FormGroup from "./FormGroup"; // Import the FormGroup modal
+import { HOST } from "../../api/constants";
 
 const ContactsHeader = () => {
   const { user } = useAuthContext();
@@ -55,7 +56,7 @@ const ContactsHeader = () => {
       }}
     >
       <Avatar
-        src={`http://localhost:8747${user.image}`}
+        src={`${HOST}${user.image}`}
         alt={user?.username || "User"}
         onClick={handleProfileClick}
         style={{ cursor: "pointer" }}

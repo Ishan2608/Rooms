@@ -5,7 +5,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import { useChatContext } from "../../context/ChatContext";
 import GroupInfo from "./GroupInfo";
-import { CHAT_ROUTES } from "../../api/constants";
+import { CHAT_ROUTES, HOST } from "../../api/constants";
 import axios from "axios";
 
 // Styled components
@@ -48,9 +48,9 @@ const ChatsHeader = () => {
     : null;
 
   const displayImage = selectedContact
-    ? `http://localhost:8747${selectedContact.image}`
+    ? `${HOST}${selectedContact.image}`
     : selectedGroup
-    ? selectedGroup.image
+    ? `${HOST}${selectedGroup.image}`
     : null;
 
   const handleMenuClick = (event) => {
