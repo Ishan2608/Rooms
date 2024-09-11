@@ -77,7 +77,7 @@ const ChatProvider = ({ children }) => {
      console.error("Error fetching chat messages:", error);
      setCurrentMessages([]); // Clear messages on error
    }
- }, [selectedContact, selectedGroup]);
+ }, [selectedContact, selectedGroup, blockedUsers, unknownContacts]);
 
   return (
     <ChatContext.Provider

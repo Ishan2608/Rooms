@@ -21,6 +21,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+
 // Add a contact to the user's contact list
 export const addContact = async (req, res) => {
   const { contactId } = req.body;
@@ -71,6 +72,7 @@ export const getContacts = async (req, res) => {
   }
 };
 
+
 // Function to delete a contact
 export const deleteContact = async (req, res) => {
   try {
@@ -98,6 +100,7 @@ export const deleteContact = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 // Fetch messages for a specific user-user chat
 export const fetchUserChatMessages = async (req, res) => {
@@ -153,18 +156,17 @@ export const fetchGroupChatMessages = async (req, res) => {
   }
 };
 
-
+// Fetch list of all groups user is part of
 export const getGroups = async (req, res) => {
   try {
     const userId = req.userId;
 
     // Find all groups where the user is a member
-    const groups = await Group.find({ members: userId }).populate("admin", "id username image").populate("members", "id username image");
+    const groups = await Group.find({ members: userId })
+      .populate("admin", "id username image")
+      .populate("members", "id username image");
 
-    if (!groups.length) {
-      return res.status(404).json({ message: "No groups found" });
-    }
-
+    // Return the groups, even if the array is empty
     res.status(200).json(groups);
   } catch (error) {
     console.error(error);
@@ -172,7 +174,7 @@ export const getGroups = async (req, res) => {
   }
 };
 
-
+// Fetch information of the current selected group
 export const fetchGroupInfo = async (req, res) => {
   try {
     const groupId = req.params.groupId;
@@ -195,7 +197,7 @@ export const fetchGroupInfo = async (req, res) => {
 
 export const handleFileMessage = async (req, res) => {
   try {
-    const { recipient, group} = req.body;
+    const { recipient, group } = req.body;
     const sender = req.userId;
 
     if (!req.file) {
@@ -242,9 +244,12 @@ export const handleFileMessage = async (req, res) => {
   }
 };
 
+// -----------------------------------------------------------------
 // Advanced Functionalities
+// -----------------------------------------------------------------
 
-export const fetchUnknownMessages = async (req, res) => {
+// Fetch list of all those users who have send message to this user but not in his contacts
+export const fetchUnknownContacts = async (req, res) => {
   try {
     const userId = req.userId;
 
@@ -266,6 +271,7 @@ export const fetchUnknownMessages = async (req, res) => {
   }
 };
 
+// Add an unknown user to your contacts if you know him/her
 export const addUnknownUserToContacts = async (req, res) => {
   try {
     const userId = req.userId; // ID of the current user making the request
@@ -308,7 +314,7 @@ export const addUnknownUserToContacts = async (req, res) => {
   }
 };
 
-
+// Fetch list of all blocked users
 export const fetchBlockedContacts = async (req, res) => {
   try {
     const userId = req.userId;
@@ -316,7 +322,7 @@ export const fetchBlockedContacts = async (req, res) => {
     // Find the user by ID and populate the blockedContacts field
     const user = await User.findById(userId).populate(
       "blockedContacts",
-      "firstName lastName username image"
+      "id firstName lastName username image"
     ); // Populate with required fields
 
     if (!user) {
@@ -331,6 +337,7 @@ export const fetchBlockedContacts = async (req, res) => {
   }
 };
 
+// Block a particular user
 export const blockUser = async (req, res) => {
   try {
     const userId = req.userId;
@@ -349,12 +356,12 @@ export const blockUser = async (req, res) => {
 
     // Remove the user from contacts if they are in there
     user.contacts = user.contacts.filter(
-      (contact) => contact.toString() !== blockUserId
+      (contact) => contact._id.toString() !== blockUserId
     );
 
     // Remove any unknown messages from this user
-    user.unknownMessages = user.unknownMessages.filter(
-      (message) => message.user.toString() !== blockUserId
+    user.unknownContacts = user.unknownContacts.filter(
+      (contact) => contact._id.toString() !== blockUserId
     );
 
     await user.save();
@@ -366,6 +373,7 @@ export const blockUser = async (req, res) => {
   }
 };
 
+// Unblock a particular user and add him to your contacts
 export const unblockUser = async (req, res) => {
   try {
     const userId = req.userId;
@@ -379,7 +387,7 @@ export const unblockUser = async (req, res) => {
 
     // Remove the user from the blockedContacts list
     user.blockedContacts = user.blockedContacts.filter(
-      (blockedUser) => blockedUser.toString() !== unblockUserId
+      (blockedUser) => blockedUser._id.toString() !== unblockUserId
     );
 
     await user.save();

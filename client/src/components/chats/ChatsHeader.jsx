@@ -138,9 +138,45 @@ const ChatsHeader = () => {
     }
   };
 
+  // Unblock a user
+  const handleUnblockUser = async () => {
+    try {
+      if (!selectedContact) return;
+
+      const url = `${CHAT_ROUTES.UNBLOCK_USER}/${selectedContact._id}`;
+      const response = await axios.post(url, {}, { withCredentials: true });
+
+      if (response.status === 200) {
+        console.log("User unblocked successfully:", response.data);
+
+        // Update blocked users list by removing the unblocked user
+        setBlockedUsers((prev) =>
+          prev.filter((user) => user._id !== selectedContact._id)
+        );
+
+        // Optionally, update contacts if needed
+        const updatedContactsResponse = await axios.get(
+          CHAT_ROUTES.GET_ALL_CONTACTS,
+          { withCredentials: true }
+        );
+        setContacts(updatedContactsResponse.data);
+      } else {
+        console.error("Failed to unblock user. Status:", response.status);
+      }
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+    } finally {
+      handleMenuClose();
+    }
+  };
+
   const isUnknownUser =
     selectedContact &&
-    unknownContacts.some((user) => user._id === selectedContact._id); // Adjusted comparison
+    unknownContacts.some((user) => user._id === selectedContact._id);
+
+  const isBlockedUser =
+    selectedContact &&
+    blockedUsers.some((user) => user._id === selectedContact._id);
 
   return (
     <>
@@ -196,16 +232,22 @@ const ChatsHeader = () => {
                   Block this user
                 </MenuItem>,
               ]
+            ) : isBlockedUser ? (
+              <MenuItem
+                key="unblock-user"
+                onClick={handleUnblockUser}
+                sx={{ color: "green" }}
+              >
+                Unblock Contact
+              </MenuItem>
             ) : (
-              [
-                <MenuItem
-                  key="block-contact"
-                  onClick={handleBlockUser}
-                  sx={{ color: "orange" }}
-                >
-                  Block Contact
-                </MenuItem>,
-              ]
+              <MenuItem
+                key="block-contact"
+                onClick={handleBlockUser}
+                sx={{ color: "orange" }}
+              >
+                Block Contact
+              </MenuItem>
             )
           ) : null}
         </Menu>

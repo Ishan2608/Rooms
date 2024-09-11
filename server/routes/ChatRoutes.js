@@ -5,7 +5,7 @@ import {
   getAllUsers, addContact, getContacts, deleteContact,
   fetchUserChatMessages, fetchGroupChatMessages,
   getGroups, fetchGroupInfo,
-  fetchUnknownMessages, fetchBlockedContacts,
+  fetchUnknownContacts, fetchBlockedContacts,
   handleFileMessage,
   addUnknownUserToContacts,
   blockUser
@@ -52,7 +52,7 @@ routes.put(
 // ---------------------------------------------------------------
 
 // Fetch all unknown messages (messages from users not in contacts)
-routes.get("/unknown-messages", verifyToken, fetchUnknownMessages);
+routes.get("/unknown-messages", verifyToken, fetchUnknownContacts);
 
 // Add an unknown user to contact, from which you have received a message
 routes.post("/add-unknown-to-contacts/:userId", verifyToken, addUnknownUserToContacts);
