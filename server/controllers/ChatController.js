@@ -260,8 +260,8 @@ export const fetchUnknownContacts = async (req, res) => {
         "id firstName lastName username image",
       )
 
-    if (!user || !user.unknownContacts.length) {
-      return res.status(404).json({ message: "No unknown messages found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not Found" });
     }
 
     res.status(200).json(user.unknownContacts);
