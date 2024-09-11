@@ -14,13 +14,14 @@ import { CHAT_ROUTES } from "../../api/constants";
 
 const BlockedUsersList = () => {
   const {
-    blockedUsers,
+    selectContact,
+    blockedUsers = [], // Ensure blockedUsers is always an array
     updateBlockedUsers,
+    setBlockedUsers
   } = useChatContext(); // Access global state
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
     const fetchBlockedUsers = async () => {
       try {
         const response = await axios.get(CHAT_ROUTES.FETCH_BLOCKED_CONTACTS, {
@@ -29,16 +30,18 @@ const BlockedUsersList = () => {
         updateBlockedUsers(response.data);
       } catch (error) {
         console.error("Error fetching blocked users:", error);
+      } finally {
+        setLoading(false); // Update loading state after data is fetched
       }
     };
 
     fetchBlockedUsers();
-  }, [updateBlockedUsers]);
+  }, [updateBlockedUsers, setBlockedUsers]);
 
   const handleContactClick = (contact) => {
+    // Make sure selectContact is defined or imported, otherwise remove this line
     selectContact(contact);
   };
-
 
   return (
     <>
@@ -61,8 +64,9 @@ const BlockedUsersList = () => {
           <Box>
             {loading ? (
               <Typography variant="body1">Loading contacts...</Typography>
-            ): blockedUsers.length === 0 ? (<Typography variant="body1">No blocked users.</Typography>
-            ):(
+            ) : blockedUsers.length === 0 ? (
+              <Typography variant="body1">No blocked users.</Typography>
+            ) : (
               blockedUsers.map((user) => (
                 <ContactCard
                   key={user._id}
@@ -72,7 +76,6 @@ const BlockedUsersList = () => {
                 />
               ))
             )}
-            
           </Box>
         </AccordionDetails>
       </Accordion>

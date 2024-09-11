@@ -8,7 +8,7 @@ import {
   fetchUnknownContacts, fetchBlockedContacts,
   handleFileMessage,
   addUnknownUserToContacts,
-  blockUser
+  blockUser, unblockUser
 } from "../controllers/ChatController.js";
 
 
@@ -64,6 +64,6 @@ routes.get("/blocked-contacts", verifyToken, fetchBlockedContacts);
 routes.post("/block-user/:userId", verifyToken, blockUser);
 
 // unblock a user
-routes.post("/unblock-user/:userId", verifyToken, blockUser);
+routes.post("/unblock-user/:userId", verifyToken, unblockUser);
 
 export default routes;

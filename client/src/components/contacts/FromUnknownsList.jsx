@@ -13,7 +13,7 @@ import axios from "axios";
 import { CHAT_ROUTES } from "../../api/constants";
 
 const FromUnknownsList = () => {
-  const { unknownContacts, selectContact, updateUnknownContacts } = useChatContext();
+  const { unknownContacts, setUnknownContacts, selectContact, updateUnknownContacts } = useChatContext();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const FromUnknownsList = () => {
     };
 
     fetchUnknownContacts();
-  }, [updateUnknownContacts]);
+  }, [setUnknownContacts]);
 
   const handleContactClick = (contact) => {
     selectContact(contact);

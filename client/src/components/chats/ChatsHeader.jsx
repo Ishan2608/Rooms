@@ -7,6 +7,7 @@ import { useChatContext } from "../../context/ChatContext";
 import GroupInfo from "./GroupInfo";
 import { CHAT_ROUTES, HOST } from "../../api/constants";
 import axios from "axios";
+import { green } from "@mui/material/colors";
 
 // Styled components
 const HeaderContainer = styled("div")({
@@ -33,6 +34,7 @@ const ChatsHeader = () => {
     setContacts,
     unknownContacts,
     blockedUsers,
+    setSelectedContact,
     setBlockedUsers,
     setUnknownContacts,
   } = useChatContext();
@@ -126,8 +128,16 @@ const ChatsHeader = () => {
 
         // Remove user from unknown contacts
         setUnknownContacts((prev) =>
-          prev.filter((user) => user.sender !== selectedContact._id)
+          prev.filter((user) => user._id !== selectedContact._id)
         );
+
+        // Remove user from contacts
+        setContacts((prev) =>
+          prev.filter((user) => user._id !== selectedContact._id)
+        );
+
+        setSelectedContact(null);
+
       } else {
         console.error("Failed to block user. Status:", response.status);
       }
@@ -236,7 +246,7 @@ const ChatsHeader = () => {
               <MenuItem
                 key="unblock-user"
                 onClick={handleUnblockUser}
-                sx={{ color: "green" }}
+                sx={{ color: "white", bgcolor: green[400] }}
               >
                 Unblock Contact
               </MenuItem>

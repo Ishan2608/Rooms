@@ -390,6 +390,8 @@ export const unblockUser = async (req, res) => {
       (blockedUser) => blockedUser._id.toString() !== unblockUserId
     );
 
+    // Add the contactId to the user's contact list
+    user.contacts.push(unblockUserId);
     await user.save();
 
     res.status(200).json({ message: "User unblocked" });
