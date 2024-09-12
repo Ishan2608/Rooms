@@ -120,12 +120,29 @@ export const SocketProvider = ({ children }) => {
         console.log("Group deleted:", groupId);
       };
 
+      const handleGroupMemberLeave = (groupId) => {
+        
+        updateGroups((prevGroups) => {
+          // Filter out the group that the user left
+          return prevGroups.filter((group) => group._id !== groupId);
+        });
+
+        // If the user had the group selected, clear the selection
+        if (selectedGroup && selectedGroup._id === groupId) {
+          selectGroup(null); // Clear selected group
+          setCurrentMessages([]); // Clear messages for the left group
+        }
+
+        console.log("Left group");
+      };
+
       socket.current.on("receiveMessage", handleReceiveMessage);
       socket.current.on("receiveGroupMessage", handleReceiveGroupMessage);
       socket.current.on("receiveUnknownMessage", handleReceiveUnknownMessage);
       socket.current.on("groupCreated", handleGroupCreated);
       socket.current.on("groupUpdated", handleGroupUpdated);
       socket.current.on("groupDeleted", handleGroupDeleted);
+      socket.current.on("groupMemberLeft", handleGroupMemberLeave);
 
       return () => {
         socket.current.disconnect();
