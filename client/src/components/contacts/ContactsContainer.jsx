@@ -13,7 +13,7 @@ const ContactsContainer = () => {
         width: "25%", // Adjust width as needed
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        minHeight: "100vh",
         backgroundColor: "#424242",
         color: "#fff",
       }}
@@ -21,7 +21,6 @@ const ContactsContainer = () => {
       <ContactsHeader />
       <Box
         sx={{
-          flex: 1,
           overflowY: "auto",
           padding: "10px",
         }}

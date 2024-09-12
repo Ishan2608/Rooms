@@ -4,12 +4,11 @@ import bcrypt from "bcrypt";
 
 const maxAge = 3 * 24 * 60 * 60 * 1000;
 const createToken = (email, userId) => {
-    return jwt.sign({email, userId}, process.env.JWT_KEY, {expiresIn: maxAge});
+  return jwt.sign({email, userId}, process.env.JWT_KEY, {expiresIn: maxAge});
 }
 
 export const signup = async (req, res, next) => {
     try{
-      // Log fields from req.body. Log file info from req.file
       // console.log("Request Body:", req.body);
       // console.log("Uploaded File:", req.file);
       const { firstName, lastName, username, email, password } = req.body;
@@ -46,7 +45,7 @@ export const signup = async (req, res, next) => {
 
       // Update image if provided
       if (req.file) {
-        const folderPath = `/images/users`;
+        const folderPath = `/public/images/users`;
         const imageUrl = `${folderPath}/${req.file.filename}`;
         user.image = imageUrl;
       }
@@ -177,14 +176,13 @@ export const updateProfileInfo = async (req, res, next) => {
 
     // Update image if provided
     if (req.file) {
-      console.log(req.file.filename);
       // Delete old image if it exists
-      const oldImagePath = user.image; // Old image path in the database
+      const oldImagePath = user.image;
       deleteOldImage(oldImagePath);
 
       // Save new image
       const timestamp = new Date().getTime();
-      const imageUrl = `/images/users/${timestamp}-${req.file.filename}`;
+      const imageUrl = `/public/images/users/${timestamp}-${req.file.filename}`;
       user.image = imageUrl;
     }
 

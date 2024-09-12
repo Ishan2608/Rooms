@@ -77,9 +77,11 @@ export const setupSocket = (server) => {
         .populate("admin", "id username image")
         .populate("members", "id username image");
 
+      console.log("Backend: Group Created");
+
       // Notify all group members about the new group
       populatedGroup.members.forEach((member) => {
-        const memberSocket = userMap.get(member._id.toString());
+        const memberSocket = userMap.get(member._id);
         if (memberSocket) {
           io.to(memberSocket).emit("groupCreated", populatedGroup);
         }

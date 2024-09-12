@@ -15,9 +15,11 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useChatContext } from "../../context/ChatContext"; // Assuming this is where your global state is managed
 import { useSocketContext } from "../../context/SocketContext";
+import { useAuthContext } from "../../context/AuthContext";
 
 const FormGroup = ({ onClose }) => {
-  const { contacts, updateGroups, selectGroup } = useChatContext();
+  const {user} = useAuthContext();
+  const { contacts } = useChatContext();
   const socket = useSocketContext();
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedContacts, setSelectedContacts] = useState({});
@@ -55,23 +57,13 @@ const FormGroup = ({ onClose }) => {
       // Emit the group creation event via socket
       socket.emit("createGroup", {
         name: groupTitle,
-        members: selectedContactIds,
-        admin: user.id, // Assuming `user.id` contains the ID of the current user
+        members: [...selectedContactIds, user.id],
+        admin: user.id,
       });
 
-      // Listen for the server's acknowledgment that the group was created
-      socket.on("groupCreated", (newGroup) => {
-        console.log("Group created successfully:", newGroup);
+      // Close the modal
+      onClose();
 
-        // Update the global state to include the new group
-        updateGroups((prevGroups) => [...prevGroups, newGroup]);
-
-        // Set the newly created group as selected
-        selectGroup(newGroup);
-
-        // Close the modal
-        onClose();
-      });
     } catch (error) {
       console.error("Error creating group:", error.message);
       setSnackbarMessage("Error creating group!");

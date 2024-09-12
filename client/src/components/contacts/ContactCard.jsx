@@ -24,11 +24,10 @@ const ContactCard = ({ username, fullName, image, onClick }) => {
   const imageURL = `${HOST}${image}`;
   return (
     <StyledCard onClick={onClick}>
-      {image && (
-        <Tooltip title={username}>
-          <StyledAvatar src={imageURL} alt={username} />
-        </Tooltip>
-      )}
+      <Tooltip title={username}>
+        <StyledAvatar src={imageURL} alt={username} />
+      </Tooltip>
+      
       <CardContent>
         <Typography variant="body1" noWrap>
           {username}

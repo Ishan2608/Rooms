@@ -63,6 +63,7 @@ const ContactsList = () => {
         <AccordionDetails
           sx={{
             maxHeight: "calc(100vh - 150px)",
+            overflowY: "auto"
           }}
         >
           <Box>

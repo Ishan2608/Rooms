@@ -19,7 +19,7 @@ const __dirname = dirname(__filename);
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
-const dbURL = process.env.DATABASE_URL;
+const dbURL = process.env.MONGODB_CONNECTION_STRING;
 
 // global middlewares to use. These apply on the entire app
 app.use(

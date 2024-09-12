@@ -15,6 +15,8 @@ export const SocketProvider = ({ children }) => {
   const { user } = useAuthContext();
   const {
     selectedContact,
+    groups,
+    setGroups,
     selectedGroup,
     selectGroup,
     updateGroups,
@@ -99,14 +101,17 @@ export const SocketProvider = ({ children }) => {
       };
 
       const handleGroupCreated = (group) => {
-        updateGroups((prevGroups) => [...prevGroups, group]);
-        console.log("New group created:", group);
+        const newGroups = [...groups, group];
+        // updateGroups(newGroups);
+        setGroups(newGroups);
+        selectGroup(group);
       };
 
       const handleGroupUpdated = (group) => {
         updateGroups((prevGroups) =>
           prevGroups.map((g) => (g._id === group._id ? group : g))
         );
+        selectGroup(group);
         console.log("Group updated:", group);
       };
 
@@ -115,13 +120,14 @@ export const SocketProvider = ({ children }) => {
           prevGroups.filter((g) => g._id !== groupId)
         );
         if (selectGroup && selectGroup._id === groupId) {
-          selectGroup(null); // Clear the selected group if it was deleted
+          selectGroup(null); // Clear selected group
+          setCurrentMessages([]); // Clear messages for the left group
         }
         console.log("Group deleted:", groupId);
       };
 
       const handleGroupMemberLeave = (groupId) => {
-        
+
         updateGroups((prevGroups) => {
           // Filter out the group that the user left
           return prevGroups.filter((group) => group._id !== groupId);

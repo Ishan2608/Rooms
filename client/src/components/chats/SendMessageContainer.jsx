@@ -12,7 +12,7 @@ const SendMessageContainer = () => {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  const {user} = useAuthContext();
+  const { user } = useAuthContext();
 
   const { selectedContact, selectedGroup, setCurrentMessages } = useChatContext();
   const socket = useSocketContext();

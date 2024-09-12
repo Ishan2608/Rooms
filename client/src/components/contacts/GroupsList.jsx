@@ -20,7 +20,7 @@ const GroupsList = () => {
     selectGroup
   } = useChatContext(); // Default groups to empty array
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("You do not have any groups");
 
   useEffect(() => {
     // Fetch groups from the API
@@ -48,7 +48,7 @@ const GroupsList = () => {
 
   // Handle group click
   const handleGroupClick = (group) => {
-    selectGroup(group); // Set selected group in the context
+    selectGroup(group);
   };
 
   return (
@@ -66,12 +66,13 @@ const GroupsList = () => {
       <AccordionDetails
         sx={{
           maxHeight: "calc(100vh - 150px)",
+          overflowY: "auto",
         }}
       >
         <Box>
           {loading ? (
             <Typography>Loading groups...</Typography>
-          ) : error ? (
+          ) : groups.length === 0 ? (
             <Typography>{error}</Typography>
           ) : (
             groups.map((group) => (
@@ -83,7 +84,7 @@ const GroupsList = () => {
                 sx={{
                   backgroundColor:
                     selectedGroup?._id === group._id ? "#555" : "transparent",
-                }} // Highlight selected group
+                }}
               />
             ))
           )}

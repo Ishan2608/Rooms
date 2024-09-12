@@ -22,6 +22,7 @@ import { useSocketContext } from "../../context/SocketContext";
 import ContactCard from "../contacts/ContactCard";
 import { green, red } from "@mui/material/colors";
 import { CHAT_ROUTES } from "../../api/constants";
+import axios from "axios";
 
 // Styled components
 const SliderContainer = styled(Box)({
@@ -49,7 +50,7 @@ const CloseButton = styled(IconButton)({
 
 const GroupInfo = ({ open, onClose }) => {
   const { user } = useAuthContext();
-  const { selectedGroup, setSelectedGroup, fetchGroupInfo } = useChatContext();
+  const { selectedGroup, fetchGroupInfo } = useChatContext();
   const socket = useSocketContext();
 
   if (!selectedGroup) {
@@ -74,21 +75,6 @@ const GroupInfo = ({ open, onClose }) => {
     }, 500);
   }, [selectedGroup]);
 
-  useEffect(() => {
-    const handleGroupInfoUpdated = () => {
-      // Fetch updated group info from backend after socket event
-      fetchGroupInfo(selectedGroup._id);
-      setSnackbarType("success");
-      setOpenSnackbar(true);
-    };
-
-    socket.on("groupInfoUpdated", handleGroupInfoUpdated);
-
-    return () => {
-      socket.off("groupInfoUpdated", handleGroupInfoUpdated);
-    };
-  }, [selectedGroup, socket]);
-
   const handleImageUpload = (event) => {
     setImageFile(event.target.files[0]);
     const reader = new FileReader();
@@ -97,6 +83,10 @@ const GroupInfo = ({ open, onClose }) => {
     };
     reader.readAsDataURL(event.target.files[0]);
   };
+
+  const handleDeleteImage = () => {
+    console.log("Will Remove Image");
+  }
 
   const handleSave = async () => {
     if (!groupName.trim()) {
@@ -107,7 +97,7 @@ const GroupInfo = ({ open, onClose }) => {
 
     try {
       // Send text data (name, description) via socket
-      socket.emit("updateGroupInfo", {
+      socket.emit("updateGroup", {
         id: selectedGroup._id,
         name: groupName,
         description: groupDescription,
@@ -139,6 +129,14 @@ const GroupInfo = ({ open, onClose }) => {
       setOpenSnackbar(true);
     }
   };
+
+  const handleLeaveGroup = () => {
+    console.log("Leaving Group");
+  }
+
+  const handleDeleteGroup = () => {
+    console.log("Delete Group");
+  }
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -194,6 +192,9 @@ const GroupInfo = ({ open, onClose }) => {
                 onChange={handleImageUpload}
               />
             </IconButton>
+            <IconButton onClick={handleDeleteImage}>
+              <DeleteIcon />
+            </IconButton>
           </Box>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -231,6 +232,20 @@ const GroupInfo = ({ open, onClose }) => {
             <EditIcon />
           </IconButton>
         </Box>
+        <Box>
+          <Typography variant="h6">Members:</Typography>
+          {members.length > 0 ? (
+            members.map((member) => (
+              <ContactCard
+                key={member._id}
+                username={member.username}
+                image={member.image}
+              />
+            ))
+          ) : (
+            <Typography variant="body2">No members available</Typography>
+          )}
+        </Box>
         <Stack direction="column" spacing={2}>
           <Button
             variant="contained"
@@ -240,6 +255,23 @@ const GroupInfo = ({ open, onClose }) => {
             onClick={handleSave}
           >
             Save
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<LogoutIcon />}
+            onClick={handleLeaveGroup}
+          >
+            Leave
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<DeleteIcon />}
+            disabled={user.id !== selectedGroup.admin._id}
+            onClick={handleDeleteGroup}
+          >
+            Delete
           </Button>
         </Stack>
       </Box>
