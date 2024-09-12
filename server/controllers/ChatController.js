@@ -195,6 +195,27 @@ export const fetchGroupInfo = async (req, res) => {
   }
 };
 
+export const uploadGroupImage = async (req, res) => {
+  try {
+    const groupId = req.params.groupId;
+    const group = await Group.findById(groupId);
+
+    if (!group) return res.status(404).json({ message: "Group not found" });
+
+    // Store the new image and update group info
+    const fileName = req.file.filename;
+    const imagePath = `images/groups/${fileName}`;
+    group.image = imagePath;
+
+    await group.save();
+
+    return res.json({ message: "Image uploaded successfully" });
+  } catch (error) {
+    console.error("Error uploading group image:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+
 export const handleFileMessage = async (req, res) => {
   try {
     const { recipient, group } = req.body;
@@ -218,7 +239,7 @@ export const handleFileMessage = async (req, res) => {
     const populatedMessage = await Chat.findById(createdMessage._id)
       .populate("sender", "id username image")
       .populate("recipient", "id username image")
-      .populate("group", "id name");
+      .populate("group", "id name image");
 
     if (recipient) {
       const recipientSocket = getUserSocket(recipient);
@@ -238,6 +259,7 @@ export const handleFileMessage = async (req, res) => {
     }
 
     return res.status(200).json(populatedMessage);
+
   } catch (error) {
     console.error("Error handling file message:", error);
     return res.status(500).json({ error: "Internal server error" });

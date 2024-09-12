@@ -25,6 +25,8 @@ export const CHAT_ROUTES = {
   GET_ALL_GROUPS: `${CHAT_ROOT}/groups`,
   FETCH_GROUP_INFO: `${CHAT_ROOT}/group/:groupId`,
 
+  UPLOAD_GROUP_IMAGE: `${CHAT_ROOT}/upload-image`,
+
   FETCH_USER_CHAT_MESSAGES: `${CHAT_ROOT}/messages/user`,
   FETCH_GROUP_CHAT_MESSAGES: `${CHAT_ROOT}/messages/group`,
 

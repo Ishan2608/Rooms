@@ -1,5 +1,6 @@
 import multer from "multer";
 import fs from "fs"
+import Group from "../models/GroupModel";
 
 // Configure multer for handling chat files
 const fileStorage = multer.diskStorage({
@@ -24,7 +25,13 @@ export const fileUpload = multer({
 // Configure multer (can be moved to a separate file for better organization)
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const folderPath = `./public/images/users`;
+    const folderPath = "";
+    const groupId = Group.findById(req.params.groupId);
+    if(groupId){
+      folderPath = './public/images/groups';
+    } else {
+      folderPath = `./public/images/users`;
+    }
     fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
     cb(null, folderPath);
   },

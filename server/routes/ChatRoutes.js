@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/AuthMiddleware.js";
-import { fileUpload } from "../middlewares/multer.js";
+import { fileUpload, imageUpload } from "../middlewares/multer.js";
 import {
   getAllUsers, addContact, getContacts, deleteContact,
   fetchUserChatMessages, fetchGroupChatMessages,
-  getGroups, fetchGroupInfo,
+  getGroups, fetchGroupInfo, uploadGroupImage,
   fetchUnknownContacts, fetchBlockedContacts,
   handleFileMessage,
   addUnknownUserToContacts,
@@ -38,12 +38,10 @@ routes.get("/group/:groupId", verifyToken, fetchGroupInfo);
 // Fetch all groups the user is a part of
 routes.get("/groups", verifyToken, getGroups);
 
-routes.put(
-  "/fileMessage",
-  verifyToken,
-  fileUpload.single("file"),
-  handleFileMessage
-);
+// Upload the profile picture of a group
+routes.put("/upload-image/:groupId", verifyToken, imageUpload.single("image"), uploadGroupImage);
+
+routes.post("/fileMessage", verifyToken, fileUpload.single("file"), handleFileMessage );
 
 
 

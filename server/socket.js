@@ -91,70 +91,30 @@ export const setupSocket = (server) => {
 
   const updateGroupInfo = async (data) => {
     try {
-      const { id, name, description, imageFile } = data;
+      const { id, name, description } = data;
       const group = await Group.findById(id).populate("members");
 
-      if (!group) {
-        return;
-      }
+      if (!group) return;
 
       // Update group details
       if (name) group.name = name;
       if (description) group.description = description;
 
-      if (imageFile) {
-        // Decode base64 string and save image
-        const base64Data = imageFile.replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Data, "base64");
-        const fileName = `${new Date().getTime()}-group-image.png`; // Adjust extension as needed
-        const filePath = path.join(
-          __dirname,
-          "public",
-          "images",
-          "groups",
-          fileName
-        );
-
-        fs.writeFileSync(filePath, buffer);
-
-        // Delete old image if it exists
-        if (group.image) {
-          const oldImagePath = path.join(__dirname, "..", group.image);
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-          }
-        }
-
-        // Save the new image path
-        group.image = `/images/groups/${fileName}`;
-      }
-
-      // Add new members
-      // if (addMembers && Array.isArray(addMembers)) {
-      //   group.members = [...new Set([...group.members, ...addMembers])];
-      // }
-
-      // Remove members
-      // if (removeMembers && Array.isArray(removeMembers)) {
-      //   group.members = group.members.filter(
-      //     (memberId) => !removeMembers.includes(memberId.toString())
-      //   );
-      // }
-
       // Save updated group
       await group.save();
 
-      // Notify all members about the updated group info
+      // Emit the event to notify group members
       group.members.forEach((member) => {
         const memberSocket = userMap.get(member._id.toString());
         if (memberSocket) {
-          io.to(memberSocket).emit("groupInfoUpdated", group);
+          io.to(memberSocket).emit("groupUpdated", group);
         }
       });
     } catch (error) {
       console.error("Error handling updateGroupInfo event:", error);
     }
   };
+
 
   const leaveGroup = async ({groupId, userId}) => {
     try {

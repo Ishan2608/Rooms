@@ -16,13 +16,12 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
-
 import { useAuthContext } from "../../context/AuthContext";
 import { useChatContext } from "../../context/ChatContext";
 import { useSocketContext } from "../../context/SocketContext";
 import ContactCard from "../contacts/ContactCard";
-
 import { green, red } from "@mui/material/colors";
+import { CHAT_ROUTES } from "../../api/constants";
 
 // Styled components
 const SliderContainer = styled(Box)({
@@ -50,7 +49,7 @@ const CloseButton = styled(IconButton)({
 
 const GroupInfo = ({ open, onClose }) => {
   const { user } = useAuthContext();
-  const { selectedGroup, setSelectedGroup } = useChatContext();
+  const { selectedGroup, setSelectedGroup, fetchGroupInfo } = useChatContext();
   const socket = useSocketContext();
 
   if (!selectedGroup) {
@@ -63,15 +62,12 @@ const GroupInfo = ({ open, onClose }) => {
   const [groupDescription, setGroupDescription] = useState(
     selectedGroup?.description || "Set a Description"
   );
-  const [groupImage, setGroupImage] = useState(
-    selectedGroup?.image || `${selectedGroup.name}`
-  );
+  const [groupImage, setGroupImage] = useState(selectedGroup?.image || "");
   const [imageFile, setImageFile] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarType, setSnackbarType] = useState("success");
-
-  // Delay rendering member list to allow global state update
   const [members, setMembers] = useState([]);
+
   useEffect(() => {
     setTimeout(() => {
       setMembers(selectedGroup?.members || []);
@@ -79,63 +75,22 @@ const GroupInfo = ({ open, onClose }) => {
   }, [selectedGroup]);
 
   useEffect(() => {
-    const handleGroupInfoUpdated = (updatedGroup) => {
-      setSelectedGroup(updatedGroup);
+    const handleGroupInfoUpdated = () => {
+      // Fetch updated group info from backend after socket event
+      fetchGroupInfo(selectedGroup._id);
       setSnackbarType("success");
       setOpenSnackbar(true);
     };
 
-    const handleGroupMemberLeft = ({ groupId, userId }) => {
-      if (groupId === selectedGroup._id) {
-        console.log(`User ${userId} left the group ${groupId}`);
-        if (userId === user.id) {
-          updateGroups((prevGroups) =>
-            prevGroups.filter((group) => group._id !== groupId)
-          );
-          setSelectedGroup(null);
-          setCurrentMessages([]);
-          console.log("You have left the group.");
-        } else {
-          updateGroups((prevGroups) =>
-            prevGroups.map((group) =>
-              group._id === groupId
-                ? {
-                    ...group,
-                    members: group.members.filter(
-                      (member) => member._id !== userId
-                    ),
-                  }
-                : group
-            )
-          );
-        }
-      }
-    };
-
-    const handleGroupDeleted = (groupId) => {
-      if (groupId === selectedGroup._id) {
-        console.log(`Group ${groupId} has been deleted`);
-        updateGroups((prevGroups) =>
-          prevGroups.filter((group) => group._id !== groupId)
-        );
-        setSelectedGroup(null);
-        setCurrentMessages([]);
-        console.log("The group has been deleted.");
-      }
-    };
-
     socket.on("groupInfoUpdated", handleGroupInfoUpdated);
-    socket.on("groupMemberLeft", handleGroupMemberLeft);
-    socket.on("groupDeleted", handleGroupDeleted);
 
     return () => {
       socket.off("groupInfoUpdated", handleGroupInfoUpdated);
-      socket.off("groupMemberLeft", handleGroupMemberLeft);
-      socket.off("groupDeleted", handleGroupDeleted);
     };
-  }, [selectedGroup, user.id, setSelectedGroup]);
+  }, [selectedGroup, socket]);
 
   const handleImageUpload = (event) => {
+    setImageFile(event.target.files[0]);
     const reader = new FileReader();
     reader.onloadend = () => {
       setGroupImage(reader.result);
@@ -143,11 +98,7 @@ const GroupInfo = ({ open, onClose }) => {
     reader.readAsDataURL(event.target.files[0]);
   };
 
-  const handleDeleteImage = () => {
-    setGroupImage("");
-  };
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!groupName.trim()) {
       setSnackbarType("error");
       setOpenSnackbar(true);
@@ -155,38 +106,37 @@ const GroupInfo = ({ open, onClose }) => {
     }
 
     try {
-      const imageBase64 = imageFile ? imageFile.toString("base64") : "";
+      // Send text data (name, description) via socket
       socket.emit("updateGroupInfo", {
         id: selectedGroup._id,
         name: groupName,
         description: groupDescription,
-        imageFile: imageBase64,
       });
+
+      // Upload the image (if any) via an API request
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+
+        const url = `${CHAT_ROUTES.UPLOAD_GROUP_IMAGE}/${selectedGroup._id}`;
+        const res = await axios.put(url, formData, { withCredentials: true });
+
+        if (res.status === 200) {
+          console.log("Image uploaded successfully");
+          // Fetch the updated group info from the backend
+          await fetchGroupInfo(selectedGroup._id);
+        } else {
+          console.error("Failed to upload image");
+        }
+        
+      }
+
+      setSnackbarType("success");
+      setOpenSnackbar(true);
     } catch (error) {
       console.error("Error updating group info:", error);
       setSnackbarType("error");
       setOpenSnackbar(true);
-    }
-  };
-
-  const handleLeaveGroup = () => {
-    if (!selectedGroup) return;
-
-    socket.emit("leaveGroup", {
-      groupId: selectedGroup._id,
-      userId: user.id,
-    });
-  };
-
-  const handleDeleteGroup = () => {
-    if (!selectedGroup) return;
-
-    if (user.id === selectedGroup.admin._id) {
-      socket.emit("deleteGroup", {
-        groupId: selectedGroup._id,
-      });
-    } else {
-      console.log("You are not authorized to delete the Group");
     }
   };
 
@@ -244,9 +194,6 @@ const GroupInfo = ({ open, onClose }) => {
                 onChange={handleImageUpload}
               />
             </IconButton>
-            <IconButton onClick={handleDeleteImage}>
-              <DeleteIcon />
-            </IconButton>
           </Box>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -265,7 +212,6 @@ const GroupInfo = ({ open, onClose }) => {
             <EditIcon />
           </IconButton>
         </Box>
-
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="body1" sx={{ flexGrow: 1 }}>
             {isEditingDescription ? (
@@ -285,20 +231,6 @@ const GroupInfo = ({ open, onClose }) => {
             <EditIcon />
           </IconButton>
         </Box>
-        <Box>
-          <Typography variant="h6">Members:</Typography>
-          {members.length > 0 ? (
-            members.map((member) => (
-              <ContactCard
-                key={member._id}
-                username={member.username}
-                image={false}
-              />
-            ))
-          ) : (
-            <Typography variant="body2">No members available</Typography>
-          )}
-        </Box>
         <Stack direction="column" spacing={2}>
           <Button
             variant="contained"
@@ -308,23 +240,6 @@ const GroupInfo = ({ open, onClose }) => {
             onClick={handleSave}
           >
             Save
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            startIcon={<LogoutIcon />}
-            onClick={handleLeaveGroup}
-          >
-            Leave
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            startIcon={<DeleteIcon />}
-            disabled={user.id !== selectedGroup.admin._id}
-            onClick={handleDeleteGroup}
-          >
-            Delete
           </Button>
         </Stack>
       </Box>
