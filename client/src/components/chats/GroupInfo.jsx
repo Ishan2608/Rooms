@@ -263,13 +263,21 @@ const GroupInfo = ({ open, onClose }) => {
         <Box>
           <Typography variant="h6">Members:</Typography>
           {members.length > 0 ? (
-            members.map((member) => (
-              <ContactCard
-                key={member._id}
-                username={member.username}
-                image={member.image}
-              />
-            ))
+            members.map((member) => {
+              const isAdmin = member._id === selectedGroup.admin._id;
+              return (
+                <ContactCard
+                  key={member._id}
+                  username={member.username}
+                  image={member.image}
+                  sx={{
+                    border: isAdmin ? "2px solid white" : "none", // Highlight the admin with a white border
+                    padding: "4px", // Adjust padding for better appearance
+                    borderRadius: "8px", // Rounded corners for admin
+                  }}
+                />
+              );
+            })
           ) : (
             <Typography variant="body2">No members available</Typography>
           )}

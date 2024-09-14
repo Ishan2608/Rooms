@@ -195,6 +195,18 @@ export const fetchGroupInfo = async (req, res) => {
   }
 };
 
+// Helper function to delete the old profile image
+const deleteOldImage = (imagePath) => {
+  if (imagePath) {
+    const filePath = path.join(__dirname, '..', 'public', imagePath);
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error("Error deleting old image:", err);
+      }
+    });
+  }
+};
+
 export const uploadGroupImage = async (req, res) => {
   try {
     const groupId = req.params.groupId;
@@ -202,9 +214,14 @@ export const uploadGroupImage = async (req, res) => {
 
     if (!group) return res.status(404).json({ message: "Group not found" });
 
+
+    // Delete old image if it exists
+    const oldImagePath = group.image;
+    deleteOldImage(oldImagePath);
+
     // Store the new image and update group info
     const fileName = req.file.filename;
-    const imagePath = `images/groups/${fileName}`;
+    const imagePath = `/public/images/groups/${fileName}`;
     group.image = imagePath;
 
     await group.save();

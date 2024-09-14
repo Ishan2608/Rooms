@@ -4,7 +4,7 @@ import fs from "fs"
 // Configure multer for handling chat files
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const folderPath = `./public/chat_files`;
+    const folderPath = `../public/chat_files`;
     fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
     cb(null, folderPath);
   },
@@ -26,9 +26,9 @@ const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     let folderPath = "";
     if(req.params.groupId){
-      folderPath = './public/images/groups';
+      folderPath = '../public/images/groups';
     } else {
-      folderPath = `./public/images/users`;
+      folderPath = `../public/images/users`;
     }
     fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
     cb(null, folderPath);
