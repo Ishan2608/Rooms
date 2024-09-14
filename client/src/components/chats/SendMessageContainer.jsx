@@ -33,6 +33,7 @@ const SendMessageContainer = () => {
         recipient: selectedContact ? selectedContact._id : null,
         type: "text",
         group: selectedGroup ? selectedGroup._id : null,
+        createdAt: Date.now()
       };
 
       // Emit the message to the server

@@ -27,11 +27,7 @@ const chatSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now(),
-  },
+  }
 });
 
 chatSchema.pre("save", function (next) {
