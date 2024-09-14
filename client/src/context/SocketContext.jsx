@@ -146,7 +146,7 @@ export const SocketProvider = ({ children }) => {
       socket.current.on("receiveGroupMessage", handleReceiveGroupMessage);
       socket.current.on("receiveUnknownMessage", handleReceiveUnknownMessage);
       socket.current.on("groupCreated", handleGroupCreated);
-      socket.current.on("groupUpdated", handleGroupUpdated);
+      socket.current.on("groupInfoUpdated", handleGroupUpdated);
       socket.current.on("groupDeleted", handleGroupDeleted);
       socket.current.on("groupMemberLeft", handleGroupMemberLeave);
 

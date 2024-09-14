@@ -50,7 +50,7 @@ const CloseButton = styled(IconButton)({
 
 const GroupInfo = ({ open, onClose }) => {
   const { user } = useAuthContext();
-  const { selectedGroup, fetchGroupInfo } = useChatContext();
+  const { selectedGroup, selectGroup } = useChatContext();
   const socket = useSocketContext();
 
   if (!selectedGroup) {
@@ -59,21 +59,49 @@ const GroupInfo = ({ open, onClose }) => {
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
   const [groupName, setGroupName] = useState(selectedGroup?.name || "No Name");
   const [groupDescription, setGroupDescription] = useState(
     selectedGroup?.description || "Set a Description"
   );
   const [groupImage, setGroupImage] = useState(selectedGroup?.image || "");
+
+  const [members, setMembers] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarType, setSnackbarType] = useState("success");
-  const [members, setMembers] = useState([]);
+
+  // Store initial values
+  const initialGroupName = selectedGroup?.name || "No Name";
+  const initialGroupDescription =
+    selectedGroup?.description || "Set a Description";
+  const initialGroupImage = selectedGroup?.image || "";
 
   useEffect(() => {
     setTimeout(() => {
       setMembers(selectedGroup?.members || []);
     }, 500);
   }, [selectedGroup]);
+  // Check if any field has changed from its initial value
+  useEffect(() => {
+    if (
+      groupName !== initialGroupName ||
+      groupDescription !== initialGroupDescription ||
+      imageFile !== null ||
+      groupImage !== initialGroupImage
+    ){ 
+      setIsEditing(true);
+    } else { setIsEditing(false); }
+  }, [
+    groupName,
+    groupDescription,
+    groupImage,
+    imageFile,
+    initialGroupName,
+    initialGroupDescription,
+    initialGroupImage,
+  ]);
 
   const handleImageUpload = (event) => {
     setImageFile(event.target.files[0]);
@@ -85,8 +113,9 @@ const GroupInfo = ({ open, onClose }) => {
   };
 
   const handleDeleteImage = () => {
-    console.log("Will Remove Image");
-  }
+    setGroupImage(null); // Set the image state to null or empty string
+    setImageFile(null); // Remove the file reference
+  };
 
   const handleSave = async () => {
     if (!groupName.trim()) {
@@ -96,12 +125,6 @@ const GroupInfo = ({ open, onClose }) => {
     }
 
     try {
-      // Send text data (name, description) via socket
-      socket.emit("updateGroup", {
-        id: selectedGroup._id,
-        name: groupName,
-        description: groupDescription,
-      });
 
       // Upload the image (if any) via an API request
       if (imageFile) {
@@ -113,16 +136,21 @@ const GroupInfo = ({ open, onClose }) => {
 
         if (res.status === 200) {
           console.log("Image uploaded successfully");
-          // Fetch the updated group info from the backend
-          await fetchGroupInfo(selectedGroup._id);
         } else {
           console.error("Failed to upload image");
         }
-        
       }
 
+      // Send text data (name, description) via socket
+      socket.emit("updateGroupInfo", {
+        id: selectedGroup._id,
+        name: groupName,
+        description: groupDescription,
+      });
+      
       setSnackbarType("success");
       setOpenSnackbar(true);
+
     } catch (error) {
       console.error("Error updating group info:", error);
       setSnackbarType("error");
@@ -132,11 +160,11 @@ const GroupInfo = ({ open, onClose }) => {
 
   const handleLeaveGroup = () => {
     console.log("Leaving Group");
-  }
+  };
 
   const handleDeleteGroup = () => {
     console.log("Delete Group");
-  }
+  };
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -251,7 +279,7 @@ const GroupInfo = ({ open, onClose }) => {
             variant="contained"
             sx={{ bgcolor: green[400] }}
             endIcon={<SendIcon />}
-            disabled={!(isEditingDescription || isEditingName)}
+            disabled={!isEditing}
             onClick={handleSave}
           >
             Save

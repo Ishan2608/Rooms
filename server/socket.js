@@ -99,8 +99,8 @@ export const setupSocket = (server) => {
       if (!group) return;
 
       // Update group details
-      if (name) group.name = name;
-      if (description) group.description = description;
+      group.name = name;
+      group.description = description;
 
       // Save updated group
       await group.save();
@@ -109,7 +109,7 @@ export const setupSocket = (server) => {
       group.members.forEach((member) => {
         const memberSocket = userMap.get(member._id.toString());
         if (memberSocket) {
-          io.to(memberSocket).emit("groupUpdated", group);
+          io.to(memberSocket).emit("groupInfoUpdated", group);
         }
       });
     } catch (error) {
