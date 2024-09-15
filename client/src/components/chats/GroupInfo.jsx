@@ -132,7 +132,12 @@ const GroupInfo = ({ open, onClose }) => {
         formData.append("image", imageFile);
 
         const url = `${CHAT_ROUTES.UPLOAD_GROUP_IMAGE}/${selectedGroup._id}`;
-        const res = await axios.put(url, formData, { withCredentials: true });
+        const res = await axios.put(url, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        });
 
         if (res.status === 200) {
           console.log("Image uploaded successfully");

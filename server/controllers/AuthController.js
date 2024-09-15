@@ -9,8 +9,6 @@ const createToken = (email, userId) => {
 
 export const signup = async (req, res, next) => {
     try{
-      // console.log("Request Body:", req.body);
-      // console.log("Uploaded File:", req.file);
       const { firstName, lastName, username, email, password } = req.body;
       if (!email) {
         return res.status(400).send("Email is missing");
@@ -45,8 +43,9 @@ export const signup = async (req, res, next) => {
 
       // Update image if provided
       if (req.file) {
-        const folderPath = `/public/images/users`;
-        const imageUrl = `${folderPath}/${req.file.filename}`;
+        // Save new image
+        const timestamp = new Date().getTime();
+        const imageUrl = `/images/users/${timestamp}-${req.file.filename}`;
         user.image = imageUrl;
       }
 
@@ -182,7 +181,7 @@ export const updateProfileInfo = async (req, res, next) => {
 
       // Save new image
       const timestamp = new Date().getTime();
-      const imageUrl = `/public/images/users/${timestamp}-${req.file.filename}`;
+      const imageUrl = `/images/users/${timestamp}-${req.file.filename}`;
       user.image = imageUrl;
     }
 

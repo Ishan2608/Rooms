@@ -21,10 +21,9 @@ export const CHAT_ROUTES = {
   ADD_TO_CONTACT: `${CHAT_ROOT}/contact`,
   GET_ALL_CONTACTS: `${CHAT_ROOT}/contacts`,
   DELETE_A_CONTACT: `${CHAT_ROOT}/contacts`,
-  
+
   GET_ALL_GROUPS: `${CHAT_ROOT}/groups`,
   FETCH_GROUP_INFO: `${CHAT_ROOT}/group/:groupId`,
-
   UPLOAD_GROUP_IMAGE: `${CHAT_ROOT}/upload-image`,
 
   FETCH_USER_CHAT_MESSAGES: `${CHAT_ROOT}/messages/user`,
@@ -35,4 +34,5 @@ export const CHAT_ROUTES = {
   UNBLOCK_USER: `${CHAT_ROOT}/unblock-user`,
   FETCH_UNKNOWN_CONTACTS: `${CHAT_ROOT}/unknown-messages`,
   FETCH_BLOCKED_CONTACTS: `${CHAT_ROOT}/blocked-contacts`,
+  SEND_FILE_MESSAGE: `${CHAT_ROOT}/fileMessage`,
 };

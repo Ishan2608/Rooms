@@ -1,10 +1,11 @@
 import multer from "multer";
-import fs from "fs"
+import fs from "fs";
+import path from "path";
 
 // Configure multer for handling chat files
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const folderPath = `../public/chat_files`;
+    const folderPath = path.join(__dirname, "public", "chat_files");
     fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
     cb(null, folderPath);
   },
@@ -15,22 +16,17 @@ const fileStorage = multer.diskStorage({
   },
 });
 
-// Export the multer middleware for file uploads
-export const fileUpload = multer({
-  storage: fileStorage,
-  limits: { fieldSize: 25 * 1024 * 1024 },
-});
 
-// Configure multer (can be moved to a separate file for better organization)
+// Configure multer for handling images
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     let folderPath = "";
-    if(req.params.groupId){
-      folderPath = '../public/images/groups';
+    if (req.params.groupId) {
+      folderPath = path.join(__dirname, "public", "images", "groups");
     } else {
-      folderPath = `../public/images/users`;
+      folderPath = path.join(__dirname, "public", "images", "users");
     }
-    fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
+    fs.mkdirSync(folderPath, { recursive: true });
     cb(null, folderPath);
   },
   filename: (req, file, cb) => {
@@ -40,7 +36,11 @@ const imageStorage = multer.diskStorage({
   },
 });
 
+export const fileUpload = multer({
+  storage: fileStorage
+});
+
+
 export const imageUpload = multer({
-  storage: imageStorage,
-  limits: { fieldSize: 25 * 1024 * 1024 },
+  storage: imageStorage
 });

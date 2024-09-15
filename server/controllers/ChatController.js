@@ -235,7 +235,7 @@ export const uploadGroupImage = async (req, res) => {
 
 export const handleFileMessage = async (req, res) => {
   try {
-    const { recipient, group } = req.body;
+    const { recipient, group, createdAt } = req.body;
     const sender = req.userId;
 
     if (!req.file) {
@@ -246,9 +246,14 @@ export const handleFileMessage = async (req, res) => {
 
     const messageData = {
       sender,
-      file: fileUrl,
       ...(recipient && { recipient }),
+      file: {
+        url: fileUrl,
+        name: req.file.originalname,
+        type: req.file.mimetype,
+      },
       ...(group && { group }),
+      createdAt: createdAt,
     };
 
     const createdMessage = await Chat.create(messageData);
@@ -264,11 +269,12 @@ export const handleFileMessage = async (req, res) => {
       if (recipientSocket) {
         io.to(recipientSocket).emit("receiveMessage", populatedMessage);
       }
+      
     } else if (group) {
-      const groupMembers = await Group.findById(group).populate("members");
+      const recipientGroup = await Group.findById(group).populate("members");
 
-      groupMembers.members.forEach((member) => {
-        const memberSocket = getUserSocket(member._id.toString());
+      recipientGroup.members.forEach((member) => {
+        const memberSocket = getUserSocket(member._id);
         if (memberSocket) {
           io.to(memberSocket).emit("receiveGroupMessage", populatedMessage);
         }
@@ -276,12 +282,12 @@ export const handleFileMessage = async (req, res) => {
     }
 
     return res.status(200).json(populatedMessage);
-
   } catch (error) {
     console.error("Error handling file message:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // -----------------------------------------------------------------
 // Advanced Functionalities
