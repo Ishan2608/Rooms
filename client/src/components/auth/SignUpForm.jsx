@@ -9,7 +9,12 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
 
 import { API_ROUTES } from "../../api/constants";
+
+import { uploadFile } from "../../utility/FireBaseMiddlewares";
+
 import "../../index.css";
+
+
 
 const steps = ["Name & Email", "Profile", "Password"];
 const VisuallyHiddenInput = styled("input")({

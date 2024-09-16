@@ -20,6 +20,7 @@ import { useChatContext } from "../../context/ChatContext";
 import { useSocketContext } from "../../context/SocketContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { CHAT_ROUTES } from "../../api/constants";
+import { uploadFile } from "../../utility/FireBaseMiddlewares";
 
 // Styles for modal and overlay
 const modalStyle = {

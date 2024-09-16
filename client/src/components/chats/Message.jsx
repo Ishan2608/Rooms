@@ -6,6 +6,8 @@ import FileIcon from "@mui/icons-material/InsertDriveFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import { HOST } from "../../api/constants";
 
+import { downloadFile } from "../../utility/FireBaseMiddlewares";
+
 const MessageContainer = styled(Box)(({ issender }) => ({
   display: "flex",
   flexDirection: "column",
