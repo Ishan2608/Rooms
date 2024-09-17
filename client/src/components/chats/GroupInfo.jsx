@@ -65,7 +65,9 @@ const GroupInfo = ({ open, onClose }) => {
   const [groupDescription, setGroupDescription] = useState(
     selectedGroup?.description || "Set a Description"
   );
-  const [groupImage, setGroupImage] = useState(selectedGroup.image? `${HOST}${selectedGroup.image}` : "");
+  const [groupImage, setGroupImage] = useState(
+    selectedGroup.image ? `${HOST}${selectedGroup.image}` : ""
+  );
 
   const [members, setMembers] = useState([]);
   const [imageFile, setImageFile] = useState(null);
@@ -76,7 +78,9 @@ const GroupInfo = ({ open, onClose }) => {
   const initialGroupName = selectedGroup.name;
   const initialGroupDescription =
     selectedGroup?.description || "Set a Description";
-  const initialGroupImage = selectedGroup.image? `${HOST}${selectedGroup.image}` : "";
+  const initialGroupImage = selectedGroup.image
+    ? `${HOST}${selectedGroup.image}`
+    : "";
 
   useEffect(() => {
     setTimeout(() => {
@@ -90,9 +94,11 @@ const GroupInfo = ({ open, onClose }) => {
       groupDescription !== initialGroupDescription ||
       imageFile !== null ||
       groupImage !== initialGroupImage
-    ){ 
+    ) {
       setIsEditing(true);
-    } else { setIsEditing(false); }
+    } else {
+      setIsEditing(false);
+    }
   }, [
     groupName,
     groupDescription,
@@ -125,7 +131,6 @@ const GroupInfo = ({ open, onClose }) => {
     }
 
     try {
-
       // Upload the image (if any) via an API request
       if (imageFile) {
         const formData = new FormData();
@@ -152,10 +157,9 @@ const GroupInfo = ({ open, onClose }) => {
         name: groupName,
         description: groupDescription,
       });
-      
+
       setSnackbarType("success");
       setOpenSnackbar(true);
-
     } catch (error) {
       console.error("Error updating group info:", error);
       setSnackbarType("error");
@@ -163,12 +167,35 @@ const GroupInfo = ({ open, onClose }) => {
     }
   };
 
+  // Leaving the group
   const handleLeaveGroup = () => {
-    console.log("Leaving Group");
+    if (selectedGroup) {
+      // Emit the event to leave the group
+      socket.emit("leaveGroup", {
+        groupId: selectedGroup._id,
+        userId: user.id,
+      });
+
+      // Optionally show a confirmation message or update the UI
+      console.log("Leaving Group");
+      onClose(); // Close the GroupInfo panel after leaving
+    } else {
+      console.error("No group selected");
+    }
   };
 
+  // Deleting the group
   const handleDeleteGroup = () => {
-    console.log("Delete Group");
+    if (selectedGroup && user.id === selectedGroup.admin._id) {
+      // Emit the event to delete the group
+      socket.emit("deleteGroup", selectedGroup._id);
+
+      // Optionally show a confirmation message or update the UI
+      console.log("Deleting Group");
+      onClose(); // Close the GroupInfo panel after deleting
+    } else {
+      console.error("You are not the admin or no group selected");
+    }
   };
 
   const handleCloseSnackbar = () => {
