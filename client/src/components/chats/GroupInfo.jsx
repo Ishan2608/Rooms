@@ -50,7 +50,7 @@ const CloseButton = styled(IconButton)({
 
 const GroupInfo = ({ open, onClose }) => {
   const { user } = useAuthContext();
-  const { selectedGroup, selectGroup } = useChatContext();
+  const { selectedGroup } = useChatContext();
   const socket = useSocketContext();
 
   if (!selectedGroup) {
@@ -61,7 +61,7 @@ const GroupInfo = ({ open, onClose }) => {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const [groupName, setGroupName] = useState(selectedGroup?.name || "No Name");
+  const [groupName, setGroupName] = useState(selectedGroup.name);
   const [groupDescription, setGroupDescription] = useState(
     selectedGroup?.description || "Set a Description"
   );
@@ -73,7 +73,7 @@ const GroupInfo = ({ open, onClose }) => {
   const [snackbarType, setSnackbarType] = useState("success");
 
   // Store initial values
-  const initialGroupName = selectedGroup?.name || "No Name";
+  const initialGroupName = selectedGroup.name;
   const initialGroupDescription =
     selectedGroup?.description || "Set a Description";
   const initialGroupImage = selectedGroup?.image || "";
@@ -191,7 +191,7 @@ const GroupInfo = ({ open, onClose }) => {
         <Alert severity={snackbarType} variant="filled" sx={{ width: "100%" }}>
           {snackbarType === "success"
             ? "Group info saved successfully"
-            : "Error: Group name cannot be empty"}
+            : "Some Error Occurred, try later."}
         </Alert>
       </Snackbar>
       <Box

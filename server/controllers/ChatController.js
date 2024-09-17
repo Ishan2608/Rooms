@@ -1,9 +1,17 @@
+import fs from "fs";
+import { fileURLToPath } from "url";
+import path, {dirname} from "path";
+
 import User from "../models/UserModel.js";
 import Chat from "../models/ChatModel.js"
 import Group from "../models/GroupModel.js";
 import { getSocketInstance, getUserSocket } from "../socket.js";
 
 const io = getSocketInstance();
+
+// Construct __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Fetch list of all users in the application (for search and add to contacts)
 export const getAllUsers = async (req, res) => {
