@@ -126,12 +126,38 @@ export const SocketProvider = ({ children }) => {
         console.log("Group deleted:", groupId);
       };
 
-      const handleGroupMemberLeave = (groupId) => {
-
+      const handleGroupMemberLeave = ({ groupId, userId }) => {
+        // Update group list for the current user
         updateGroups((prevGroups) => {
-          // Filter out the group that the user left
-          return prevGroups.filter((group) => group._id !== groupId);
+          // Find the group the member left
+          return prevGroups.map((group) => {
+            if (group._id === groupId) {
+              // Remove the member from the group members list
+              return {
+                ...group,
+                members: group.members.filter(
+                  (member) => member._id !== userId
+                ),
+              };
+            }
+            return group;
+          });
         });
+
+        // Check if the current user had the group selected and deselect it if necessary
+        if (selectedGroup && selectedGroup._id === groupId) {
+          selectGroup(null); // Clear selected group
+          setCurrentMessages([]); // Clear messages for the group
+        }
+
+        console.log("A member has left the group:", userId);
+      };
+
+      const handleLeftGroup = (groupId) => {
+        // Update groups by filtering out the group that the user left
+        updateGroups((prevGroups) =>
+          prevGroups.filter((group) => group._id !== groupId)
+        );
 
         // If the user had the group selected, clear the selection
         if (selectedGroup && selectedGroup._id === groupId) {
@@ -139,7 +165,7 @@ export const SocketProvider = ({ children }) => {
           setCurrentMessages([]); // Clear messages for the left group
         }
 
-        console.log("Left group");
+        console.log("You have left the group", groupId);
       };
 
       socket.current.on("receiveMessage", handleReceiveMessage);
@@ -149,6 +175,7 @@ export const SocketProvider = ({ children }) => {
       socket.current.on("groupInfoUpdated", handleGroupUpdated);
       socket.current.on("groupDeleted", handleGroupDeleted);
       socket.current.on("groupMemberLeft", handleGroupMemberLeave);
+      socket.current.on("leftGroup", handleLeftGroup);
 
       return () => {
         socket.current.disconnect();

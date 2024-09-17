@@ -1,8 +1,8 @@
 import { Server as SocketIOServer } from "socket.io";
 import Chat from "./models/ChatModel.js";
 import Group from "./models/GroupModel.js";
-import User from "./models/UserModel.js"
-import fs from "fs"
+import User from "./models/UserModel.js";
+import fs from "fs";
 
 var io;
 const userMap = new Map();
@@ -47,8 +47,8 @@ export const setupSocket = (server) => {
       );
 
       if (!isSenderInContacts) {
-        // If sender is not in contacts, add to unknownContacts
 
+        // If sender is not in contacts, add to unknownContacts
         if (!recipientUser.unknownContacts.includes(message.sender)) {
           recipientUser.unknownContacts.push(message.sender);
           await recipientUser.save();
@@ -58,6 +58,7 @@ export const setupSocket = (server) => {
         if (recipientSocket) {
           io.to(recipientSocket).emit("receiveUnknownMessage", messageData);
         }
+
       } else {
         // Emit the message to the recipient if sender is known
         if (recipientSocket) {
@@ -124,20 +125,47 @@ export const setupSocket = (server) => {
     }
   };
 
-
-  const leaveGroup = async ({groupId, userId}) => {
+  const leaveGroup = async ({ groupId, userId }) => {
     try {
-      const group = await Group.findById(groupId);
+      const group = await Group.findById(groupId).populate(
+        "members",
+        "id username image"
+      );
 
       if (!group) {
         console.error("Group not found");
         return;
       }
 
+      // Check if the user leaving is the admin
+      const isAdmin = group.admin.toString() === userId.toString();
+
       // Remove the user from the group's members list
       group.members = group.members.filter(
-        (member) => member.toString() !== userId.toString()
+        (member) => member._id.toString() !== userId.toString()
       );
+
+      // If the group becomes empty after the user leaves, delete the group
+      if (group.members.length === 0) {
+        // Notify the user that the group has been deleted
+        const userSocket = userMap.get(userId);
+        if (userSocket) {
+          io.to(userSocket).emit("groupDeleted", groupId);
+        }
+
+        // Delete the group from the database
+        await Group.findByIdAndDelete(groupId);
+
+        console.log("Group deleted as it became empty.");
+        return;
+      }
+
+      // If the user is the admin, assign a new admin from the remaining members
+      if (isAdmin && group.members.length > 0) {
+        const randomIndex = Math.floor(Math.random() * group.members.length);
+        const newAdmin = group.members[randomIndex];
+        group.admin = newAdmin._id;
+      }
 
       // Save the updated group
       await group.save();
@@ -154,14 +182,15 @@ export const setupSocket = (server) => {
       });
 
       // Notify the user that they have left the group
-      const userSocket = userMap.get(userId.toString());
+      const userSocket = userMap.get(userId);
       if (userSocket) {
         io.to(userSocket).emit("leftGroup", groupId);
       }
     } catch (error) {
       console.error("Error handling leaveGroup event:", error);
     }
-  }
+  };
+
 
   const deleteGroup = async (groupId) => {
     try {
