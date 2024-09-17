@@ -26,6 +26,7 @@ const MessageBubble = styled(Box)(({ issender, ismedia }) => ({
   display: "flex",
   alignItems: "center",
   flexDirection: "column",
+  position: "relative", // Ensure position relative for absolute positioning of progress bar
 }));
 
 const FileDetails = styled(Box)({
@@ -41,6 +42,12 @@ const MessageTimestamp = styled(Typography)(({ issender }) => ({
   marginTop: "5px",
   textAlign: issender ? "right" : "left",
 }));
+
+const ProgressContainer = styled(Box)({
+  width: "100%",
+  position: "absolute",
+  bottom: "-4px", // Adjust position to fit within message bubble
+});
 
 const Message = ({ message }) => {
   const { user } = useAuthContext();
@@ -129,15 +136,17 @@ const Message = ({ message }) => {
               )}
           </>
         )}
-      </MessageBubble>
 
-      {message.file?.url && downloadProgress !== null && (
-        <LinearProgress
-          variant="determinate"
-          value={downloadProgress}
-          sx={{ width: "90%", marginTop: "10px" }}
-        />
-      )}
+        {message.file?.url && downloadProgress !== null && (
+          <ProgressContainer>
+            <LinearProgress
+              variant="determinate"
+              value={downloadProgress}
+              sx={{ width: "100%", backgroundColor: "#fff" }} // Adjust background color to white
+            />
+          </ProgressContainer>
+        )}
+      </MessageBubble>
 
       <MessageTimestamp issender={issender}>
         {new Date(message.createdAt).toLocaleDateString()}

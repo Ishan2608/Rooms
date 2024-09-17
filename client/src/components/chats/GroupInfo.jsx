@@ -21,7 +21,7 @@ import { useChatContext } from "../../context/ChatContext";
 import { useSocketContext } from "../../context/SocketContext";
 import ContactCard from "../contacts/ContactCard";
 import { green, red } from "@mui/material/colors";
-import { CHAT_ROUTES } from "../../api/constants";
+import { CHAT_ROUTES, HOST } from "../../api/constants";
 import axios from "axios";
 
 // Styled components
@@ -65,7 +65,7 @@ const GroupInfo = ({ open, onClose }) => {
   const [groupDescription, setGroupDescription] = useState(
     selectedGroup?.description || "Set a Description"
   );
-  const [groupImage, setGroupImage] = useState(selectedGroup?.image || "");
+  const [groupImage, setGroupImage] = useState(selectedGroup.image? `${HOST}${selectedGroup.image}` : "");
 
   const [members, setMembers] = useState([]);
   const [imageFile, setImageFile] = useState(null);
@@ -76,7 +76,7 @@ const GroupInfo = ({ open, onClose }) => {
   const initialGroupName = selectedGroup.name;
   const initialGroupDescription =
     selectedGroup?.description || "Set a Description";
-  const initialGroupImage = selectedGroup?.image || "";
+  const initialGroupImage = selectedGroup.image? `${HOST}${selectedGroup.image}` : "";
 
   useEffect(() => {
     setTimeout(() => {
