@@ -12,7 +12,8 @@ import { useAuthContext } from "../context/AuthContext";
 import { API_ROUTES, HOST } from "../api/constants";
 import axios from "axios"
 
-import { uploadFile, deleteFile } from "../utility/FireBaseMiddlewares";
+// Firebase
+// import { uploadFile, deleteFile } from "../utility/FireBaseMiddlewares";
 
 import "../index.css"
 

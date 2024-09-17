@@ -10,7 +10,7 @@ import { styled } from "@mui/material/styles";
 
 import { API_ROUTES } from "../../api/constants";
 
-import { uploadFile } from "../../utility/FireBaseMiddlewares";
+// import { uploadFile } from "../../utility/FireBaseMiddlewares";
 
 import "../../index.css";
 
