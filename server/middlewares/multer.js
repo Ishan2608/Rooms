@@ -4,14 +4,15 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-// Construct __dirname equivalent
+// Construct __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Configure multer for handling chat files
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const folderPath = path.join(__dirname, "public", "chat_files");
+    // Go up one level to access the 'public' folder
+    const folderPath = path.join(__dirname, "../public/chat_files");
     fs.mkdirSync(folderPath, { recursive: true }); // Create folder if it doesn't exist
     cb(null, folderPath);
   },
@@ -22,15 +23,16 @@ const fileStorage = multer.diskStorage({
   },
 });
 
-
 // Configure multer for handling images
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let folderPath = "";
+    let folderPath;
     if (req.params.groupId) {
-      folderPath = path.join(__dirname, "public", "images", "groups");
+      // Go up one level to access the 'public' folder for group images
+      folderPath = path.join(__dirname, "../public/images/groups");
     } else {
-      folderPath = path.join(__dirname, "public", "images", "users");
+      // Go up one level to access the 'public' folder for user images
+      folderPath = path.join(__dirname, "../public/images/users");
     }
     fs.mkdirSync(folderPath, { recursive: true });
     cb(null, folderPath);
@@ -43,10 +45,20 @@ const imageStorage = multer.diskStorage({
 });
 
 export const fileUpload = multer({
-  storage: fileStorage
+  storage: fileStorage,
 });
 
+// const imageFileFilter = (req, file, cb) => {
+//   const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/jfif", "image/webp"];
+//   if (allowedTypes.includes(file.mimetype)) {
+//     cb(null, true);
+//   } else {
+//     cb(new Error("Only images are allowed"), false);
+//   }
+// };
 
 export const imageUpload = multer({
-  storage: imageStorage
+  storage: imageStorage,
+  // fileFilter: imageFileFilter,
+  limits: { fileSize: 25 * 1024 * 1024 },
 });

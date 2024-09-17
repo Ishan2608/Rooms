@@ -221,7 +221,7 @@ export const uploadGroupImage = async (req, res) => {
 
     // Store the new image and update group info
     const fileName = req.file.filename;
-    const imagePath = `/public/images/groups/${fileName}`;
+    const imagePath = `/images/groups/${fileName}`;
     group.image = imagePath;
 
     await group.save();

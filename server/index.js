@@ -32,17 +32,18 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+// // Serve static files for user images
+// app.use('/images/users', express.static(path.join(__dirname, 'public', 'images', 'users')));
+
+// // Serve static files for group images
+// app.use('/images/groups', express.static(path.join(__dirname, 'public', 'images', 'groups')));
+
+// // Serve static files for chat files
+// app.use('/chat_files', express.static(path.join(__dirname, 'public', 'chat_files')));
+
 // Serve static files
-// app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve static files for user images
-app.use('/images/users', express.static(path.join(__dirname, 'public', 'images', 'users')));
-
-// Serve static files for group images
-app.use('/images/groups', express.static(path.join(__dirname, 'public', 'images', 'groups')));
-
-// Serve static files for chat files
-app.use('/chat_files', express.static(path.join(__dirname, 'public', 'chat_files')));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/chats", chatRoutes);

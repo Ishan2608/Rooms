@@ -40,7 +40,8 @@ const Profile = () => {
   // alert(userData.image);
 
   // State for the profile picture and Snackbar
-  const [profilePic, setProfilePic] = useState(userData.image);
+  const [imageFile, setImageFile] = useState(null);
+  const [profilePic, setProfilePic] = useState(userData.image || null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarType, setSnackbarType] = useState("success");
 
@@ -73,11 +74,7 @@ const Profile = () => {
         formData.append("email", userData.email);
         formData.append("username", userData.username);
         formData.append("password", userData.password);
-        if (profilePic) {
-          formData.append("image", profilePic);
-        } else {
-          formData.append("image", "");
-        }
+        formData.append("image", imageFile);
 
         const response = await axios.post(API_ROUTES.UPDATE_PROFILE, formData, {
           headers: {
@@ -105,6 +102,7 @@ const Profile = () => {
 
   const handleDeleteImage = () => {
     setProfilePic(null);
+    setImageFile(null);
   };
 
   const handleEditImage = () => {
@@ -115,6 +113,7 @@ const Profile = () => {
   const handleFileChange = (event) => {
     // Read the selected file and set it as the profile picture
     const file = event.target.files[0];
+    setImageFile(file);
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {

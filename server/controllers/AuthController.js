@@ -1,6 +1,14 @@
 import User from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import path, {dirname} from "path";
+
+// Construct __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 
 const maxAge = 3 * 24 * 60 * 60 * 1000;
 const createToken = (email, userId) => {
@@ -45,7 +53,7 @@ export const signup = async (req, res, next) => {
       if (req.file) {
         // Save new image
         const timestamp = new Date().getTime();
-        const imageUrl = `/images/users/${timestamp}-${req.file.filename}`;
+        const imageUrl = `/images/users/${req.file.filename}`;
         user.image = imageUrl;
       }
 
@@ -175,13 +183,14 @@ export const updateProfileInfo = async (req, res, next) => {
 
     // Update image if provided
     if (req.file) {
+      // console.log("Provided File is: ");
+      // console.log(req.file);
       // Delete old image if it exists
       const oldImagePath = user.image;
       deleteOldImage(oldImagePath);
 
       // Save new image
-      const timestamp = new Date().getTime();
-      const imageUrl = `/images/users/${timestamp}-${req.file.filename}`;
+      const imageUrl = `/images/users/${req.file.filename}`;
       user.image = imageUrl;
     }
 
