@@ -33,7 +33,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve static files for user images
 app.use('/images/users', express.static(path.join(__dirname, 'public', 'images', 'users')));
@@ -54,7 +54,6 @@ const server = app.listen(port, () => {
 
 setupSocket(server);
 
-// connect to the database using Mongoose library (an Object Document Mapping tool)
 mongoose
   .connect(dbURL, {
     serverSelectionTimeoutMS: 6000,

@@ -21,18 +21,25 @@ export const setupSocket = (server) => {
       const senderSocket = userMap.get(message.sender);
       const recipientSocket = userMap.get(message.recipient);
 
-      // Create and populate the message
-      const createdMessage = await Chat.create(message);
-      const messageData = await Chat.findById(createdMessage._id)
-        .populate("sender", "id username image")
-        .populate("recipient", "id username image");
-
       // Find the recipient user
       const recipientUser = await User.findById(message.recipient);
       if (!recipientUser) {
         console.error("Recipient user not found");
         return;
       }
+
+      const isSenderBlocked = recipientUser.blockedContacts.includes(message.sender);
+      if (isSenderBlocked) {
+        console.log("Message not sent: sender is blocked by the recipient.");
+        // Exit if the sender is blocked
+        return; 
+      }
+
+      // Create and populate the message
+      const createdMessage = await Chat.create(message);
+      const messageData = await Chat.findById(createdMessage._id)
+        .populate("sender", "id username image")
+        .populate("recipient", "id username image");
 
       // Check if the sender is in the recipient's contacts list
       const isSenderInContacts = recipientUser.contacts.includes(

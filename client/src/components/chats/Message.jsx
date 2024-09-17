@@ -15,8 +15,8 @@ const MessageContainer = styled(Box)(({ issender }) => ({
   margin: "10px 0",
 }));
 
-const MessageBubble = styled(Box)(({ issender, isMedia }) => ({
-  maxWidth: isMedia ? "80%" : "70%",
+const MessageBubble = styled(Box)(({ issender, ismedia }) => ({
+  maxWidth: ismedia ? "80%" : "70%",
   padding: "10px",
   borderRadius: "10px",
   backgroundColor: issender ? "#007aff" : "#444",
@@ -79,7 +79,7 @@ const Message = ({ message }) => {
 
   return (
     <MessageContainer issender={issender}>
-      <MessageBubble issender={issender} isMedia={isMedia}>
+      <MessageBubble issender={issender} ismedia={isMedia}>
         {message.content && <Typography>{message.content}</Typography>}
 
         {message.file?.url && (

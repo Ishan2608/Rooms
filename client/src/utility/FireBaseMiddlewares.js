@@ -1,4 +1,4 @@
-import { storage } from "./firebase.js"; // Import your storage instance
+import { storage } from "./firebaseConfig.js"; // Import your storage instance
 
 export const uploadFile = async (file) => {
   try {
