@@ -16,7 +16,7 @@ const MessageContainer = styled(Box)(({ issender }) => ({
 }));
 
 const MessageBubble = styled(Box)(({ issender, ismedia }) => ({
-  maxWidth: ismedia ? "80%" : "70%",
+  maxWidth: ismedia ? "50%" : "70%",
   padding: "10px",
   borderRadius: "10px",
   backgroundColor: issender ? "#007aff" : "#444",

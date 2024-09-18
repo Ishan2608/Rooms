@@ -48,6 +48,7 @@ const SendMessageContainer = () => {
   const [file, setFile] = useState(null); // State for storing selected file
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showFileModal, setShowFileModal] = useState(false); // State to control file modal
+  const [isSending, setIsSending] = useState(false);
 
   const { user } = useAuthContext();
   const { selectedContact, selectedGroup, setCurrentMessages } =
@@ -70,13 +71,16 @@ const SendMessageContainer = () => {
   };
 
   const handleSendMessage = async () => {
+    if (isSending) return;
+    setIsSending(true);
+
     if (message.trim() !== "" && !file && socket) {
       const newMessage = {
-        content: message,
         sender: user.id,
         recipient: selectedContact ? selectedContact._id : null,
+        content: message,
         group: selectedGroup ? selectedGroup._id : null,
-        createdAt: Date.now(),
+        createdAt: () => Date.now(),
       };
 
       if (newMessage.group) {
@@ -93,50 +97,53 @@ const SendMessageContainer = () => {
         },
       ]);
       setMessage("");
-    } else if (file) {
-      // File upload case
-      let toGroup = selectedGroup ? selectedGroup._id : null;
-      let toUser = selectedContact ? selectedContact._id : null;
-
-      const formData = new FormData();
-      if (selectedContact){
-        formData.append("recipient", toUser);
-      }
-      if (selectedGroup){
-        formData.append("group", toGroup);
-      }
-      formData.append("file", file);
-      formData.append("createdAt", Date.now());
-
-      try {
-        const response = await axios.post(
-          CHAT_ROUTES.SEND_FILE_MESSAGE,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-            withCredentials: true,
-          }
-        );
-
-        const newMessage = response.data;
-        if (selectedGroup) {
-          socket.emit("sendGroupMessage", newMessage);
-        } else {
-          socket.emit("sendMessage", newMessage);
-        }
-
-        setCurrentMessages((prevMessages) => [
-          ...prevMessages,
-          { ...newMessage, issender: true },
-        ]);
-        setFile(null); // Clear the file input
-        setShowFileModal(false); // Close modal after sending
-      } catch (error) {
-        console.error("Error sending file message:", error);
-      }
     }
+
+    setIsSending(false);
+  };
+
+  const handleSendFileMessage = async () => {
+    if (isSending || !file) return;
+    setIsSending(true);
+
+    const toGroup = selectedGroup ? selectedGroup._id : null;
+    const toUser = selectedContact ? selectedContact._id : null;
+    const date = Date.now();
+
+    const formData = new FormData();
+    if (selectedContact) {
+      formData.append("recipient", toUser);
+    }
+    if (selectedGroup) {
+      formData.append("group", toGroup);
+    }
+    formData.append("file", file);
+    formData.append("createdAt", date);
+
+    try {
+      const response = await axios.post(
+        CHAT_ROUTES.SEND_FILE_MESSAGE,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+
+      const newMessage = response.data;
+      setCurrentMessages((prevMessages) => [
+        ...prevMessages,
+        { ...newMessage, issender: true },
+      ]);
+      setFile(null); // Clear the file input
+      setShowFileModal(false); // Close modal after sending
+    } catch (error) {
+      console.error("Error sending file message:", error);
+    }
+
+    setIsSending(false);
   };
 
   const toggleEmojiPicker = () => {
@@ -240,7 +247,7 @@ const SendMessageContainer = () => {
           <Button
             variant="contained"
             sx={{ mt: 2 }}
-            onClick={handleSendMessage}
+            onClick={handleSendFileMessage} // Call the new function for file messages
           >
             Send
           </Button>

@@ -22,18 +22,14 @@ const chatSchema = new mongoose.Schema({
   },
   group: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Groups"
+    ref: "Groups",
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
-  }
+    default: () => Date.now(),
+  },
 });
 
-chatSchema.pre("save", function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
 
 const Chat = mongoose.model("Chats", chatSchema);
 export default Chat;

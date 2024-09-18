@@ -245,6 +245,7 @@ export const handleFileMessage = async (req, res) => {
   try {
     const { recipient, group, createdAt } = req.body;
     const sender = req.userId;
+    // console.log("Received file message:", { body: req.body, file: req.file });
 
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -264,7 +265,10 @@ export const handleFileMessage = async (req, res) => {
       createdAt: createdAt,
     };
 
+    // console.log("Message Data:", messageData);
     const createdMessage = await Chat.create(messageData);
+    // console.log("Created Message ID:", createdMessage._id);
+    // console.log("Created Message:", createdMessage);
 
     const populatedMessage = await Chat.findById(createdMessage._id)
       .populate("sender", "id username image")
@@ -290,6 +294,7 @@ export const handleFileMessage = async (req, res) => {
     }
 
     return res.status(200).json(populatedMessage);
+
   } catch (error) {
     console.error("Error handling file message:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -453,4 +458,3 @@ export const unblockUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-

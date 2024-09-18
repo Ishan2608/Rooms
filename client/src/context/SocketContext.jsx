@@ -119,7 +119,7 @@ export const SocketProvider = ({ children }) => {
         updateGroups((prevGroups) =>
           prevGroups.filter((g) => g._id !== groupId)
         );
-        if (selectGroup && selectGroup._id === groupId) {
+        if (selectedGroup && selectedGroup._id === groupId) {
           selectGroup(null); // Clear selected group
           setCurrentMessages([]); // Clear messages for the left group
         }
