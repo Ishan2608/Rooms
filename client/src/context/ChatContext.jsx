@@ -26,13 +26,13 @@ const ChatProvider = ({ children }) => {
 
   const selectContact = useCallback((contact) => {
     setSelectedContact(contact);
-    setSelectedGroup(null); // Clear selected group when a contact is selected
+    setSelectedGroup(null); 
     fetchChatMessages(contact);
   }, []);
 
   const selectGroup = useCallback((group) => {
     setSelectedGroup(group);
-    setSelectedContact(null); // Clear selected contact when a group is selected
+    setSelectedContact(null); 
     fetchChatMessages(group);
   }, []);
 

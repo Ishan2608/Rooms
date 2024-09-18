@@ -101,9 +101,7 @@ export const SocketProvider = ({ children }) => {
       };
 
       const handleGroupCreated = (group) => {
-        const newGroups = [...groups, group];
-        // updateGroups(newGroups);
-        setGroups(newGroups);
+        updateGroups( (prevGroups)  => [...prevGroups, group] )
         selectGroup(group);
       };
 
@@ -112,7 +110,6 @@ export const SocketProvider = ({ children }) => {
           prevGroups.map((g) => (g._id === group._id ? group : g))
         );
         selectGroup(group);
-        console.log("Group updated:", group);
       };
 
       const handleGroupDeleted = (groupId) => {
@@ -120,10 +117,9 @@ export const SocketProvider = ({ children }) => {
           prevGroups.filter((g) => g._id !== groupId)
         );
         if (selectedGroup && selectedGroup._id === groupId) {
-          selectGroup(null); // Clear selected group
-          setCurrentMessages([]); // Clear messages for the left group
+          selectGroup(null);
+          setCurrentMessages([]);
         }
-        console.log("Group deleted:", groupId);
       };
 
       const handleGroupMemberLeave = ({ groupId, userId }) => {

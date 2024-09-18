@@ -29,7 +29,6 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-
 // Add a contact to the user's contact list
 export const addContact = async (req, res) => {
   const { contactId } = req.body;
@@ -69,7 +68,7 @@ export const addContact = async (req, res) => {
     await currentUser.save();
 
     res.status(200).json({ message: "Contact added successfully" });
-    
+
   } catch (error) {
     console.error("Error adding contact:", error);
     res.status(500).json({ message: "Failed to add contact" });
@@ -207,8 +206,8 @@ export const fetchGroupInfo = async (req, res) => {
 
     // Find the group by ID
     const group = await Group.findById(groupId)
-      .populate("admin", "username")
-      .populate("members", "username");
+      .populate("admin", "id")
+      .populate("members", "id username image");
 
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
@@ -233,37 +232,54 @@ const deleteOldImage = (imagePath) => {
   }
 };
 
-export const uploadGroupImage = async (req, res) => {
+// Save and Update Group Images
+export const updateGroup = async (req, res) => {
   try {
+    const { name, description } = req.body;
     const groupId = req.params.groupId;
-    const group = await Group.findById(groupId);
+
+    const group = await Group.findById(groupId)
+      .populate("members", "id username image")
+      .populate("admin", "id username image")
 
     if (!group) return res.status(404).json({ message: "Group not found" });
 
+    if (group.name !== name) group.name = name;
+    if (group.description !== description) group.description = description;
 
-    // Delete old image if it exists
-    const oldImagePath = group.image;
-    deleteOldImage(oldImagePath);
+    if (req.file){
+      // Delete old image if it exists
+      if (group.image !== "" || group.image !== null){
+        const oldImagePath = group.image;
+        deleteOldImage(oldImagePath);
+      }
+      // Store the new image and update group info
+      const fileName = req.file.filename;
+      const imagePath = `/images/groups/${fileName}`;
+      group.image = imagePath;
+    }
 
-    // Store the new image and update group info
-    const fileName = req.file.filename;
-    const imagePath = `/images/groups/${fileName}`;
-    group.image = imagePath;
+    group.members.forEach((member) => {
+      const memberSocket = getUserSocket(member._id.toString());
+      if (memberSocket) {
+        io.to(memberSocket).emit("groupInfoUpdated", group);
+      }
+    });
 
     await group.save();
+    return res.json({ message: "Group Updated Successfully" });
 
-    return res.json({ message: "Image uploaded successfully" });
   } catch (error) {
     console.error("Error uploading group image:", error);
     return res.status(500).json({ message: "Server error" });
   }
 }
 
+// Handle File messages
 export const handleFileMessage = async (req, res) => {
   try {
     const { recipient, group, createdAt } = req.body;
     const sender = req.userId;
-    // console.log("Received file message:", { body: req.body, file: req.file });
 
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -283,10 +299,7 @@ export const handleFileMessage = async (req, res) => {
       createdAt: createdAt,
     };
 
-    // console.log("Message Data:", messageData);
     const createdMessage = await Chat.create(messageData);
-    // console.log("Created Message ID:", createdMessage._id);
-    // console.log("Created Message:", createdMessage);
 
     const populatedMessage = await Chat.findById(createdMessage._id)
       .populate("sender", "id username image")
@@ -301,10 +314,10 @@ export const handleFileMessage = async (req, res) => {
       }
       
     } else if (group) {
-      const recipientGroup = await Group.findById(group).populate("members");
+      const recipientGroup = await Group.findById(group).populate("members", "id username image");
 
       recipientGroup.members.forEach((member) => {
-        const memberSocket = getUserSocket(member._id);
+        const memberSocket = getUserSocket(member._id.toString());
         if (memberSocket) {
           io.to(memberSocket).emit("receiveGroupMessage", populatedMessage);
         }
@@ -318,11 +331,6 @@ export const handleFileMessage = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
-// -----------------------------------------------------------------
-// Advanced Functionalities
-// -----------------------------------------------------------------
 
 // Fetch list of all those users who have send message to this user but not in his contacts
 export const fetchUnknownContacts = async (req, res) => {

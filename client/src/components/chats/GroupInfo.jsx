@@ -57,18 +57,19 @@ const GroupInfo = ({ open, onClose }) => {
     return null;
   }
 
+  // States to track editing of details
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  // States to track changes values of details
   const [groupName, setGroupName] = useState(selectedGroup.name);
-  const [groupDescription, setGroupDescription] = useState(
-    selectedGroup?.description || "Set a Description"
-  );
+  const [groupDescription, setGroupDescription] = useState( selectedGroup.description || "Set a Description" );
   const [groupImage, setGroupImage] = useState(
     selectedGroup.image ? `${HOST}${selectedGroup.image}` : ""
   );
 
+  // States to track additional values
   const [members, setMembers] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -76,11 +77,8 @@ const GroupInfo = ({ open, onClose }) => {
 
   // Store initial values
   const initialGroupName = selectedGroup.name;
-  const initialGroupDescription =
-    selectedGroup?.description || "Set a Description";
-  const initialGroupImage = selectedGroup.image
-    ? `${HOST}${selectedGroup.image}`
-    : "";
+  const initialGroupDescription = selectedGroup?.description || "Set a Description";
+  const initialGroupImage = selectedGroup.image ? `${HOST}${selectedGroup.image}` : "";
 
   useEffect(() => {
     setTimeout(() => {
@@ -100,13 +98,8 @@ const GroupInfo = ({ open, onClose }) => {
       setIsEditing(false);
     }
   }, [
-    groupName,
-    groupDescription,
-    groupImage,
-    imageFile,
-    initialGroupName,
-    initialGroupDescription,
-    initialGroupImage,
+    groupName, groupDescription, groupImage, imageFile,
+    initialGroupName, initialGroupDescription, initialGroupImage,
   ]);
 
   const handleImageUpload = (event) => {
@@ -119,8 +112,8 @@ const GroupInfo = ({ open, onClose }) => {
   };
 
   const handleDeleteImage = () => {
-    setGroupImage(null); // Set the image state to null or empty string
-    setImageFile(null); // Remove the file reference
+    setGroupImage(null);
+    setImageFile(null);
   };
 
   const handleSave = async () => {
@@ -131,35 +124,30 @@ const GroupInfo = ({ open, onClose }) => {
     }
 
     try {
-      // Upload the image (if any) via an API request
+      const formData = new FormData();
+      formData.append("name", groupName);
+      formData.append("description", groupDescription);
+
       if (imageFile) {
-        const formData = new FormData();
         formData.append("image", imageFile);
-
-        const url = `${CHAT_ROUTES.UPLOAD_GROUP_IMAGE}/${selectedGroup._id}`;
-        const res = await axios.put(url, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        });
-
-        if (res.status === 200) {
-          console.log("Image uploaded successfully");
-        } else {
-          console.error("Failed to upload image");
-        }
       }
 
-      // Send text data (name, description) via socket
-      socket.emit("updateGroupInfo", {
-        id: selectedGroup._id,
-        name: groupName,
-        description: groupDescription,
-      });
+      const url = `${CHAT_ROUTES.UPLOAD_GROUP_IMAGE}/${selectedGroup._id}`;
+      const res = await axios.put( url, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        }
+      );
 
+      if (res.status === 200) {
+        console.log(res.data.message);
+      } else {
+        console.error("Failed to upload image");
+      }
+      
       setSnackbarType("success");
       setOpenSnackbar(true);
+
     } catch (error) {
       console.error("Error updating group info:", error);
       setSnackbarType("error");
@@ -171,14 +159,9 @@ const GroupInfo = ({ open, onClose }) => {
   const handleLeaveGroup = () => {
     if (selectedGroup) {
       // Emit the event to leave the group
-      socket.emit("leaveGroup", {
-        groupId: selectedGroup._id,
-        userId: user.id,
-      });
-
-      // Optionally show a confirmation message or update the UI
-      console.log("Leaving Group");
-      onClose(); // Close the GroupInfo panel after leaving
+      socket.emit("leaveGroup", { groupId: selectedGroup._id, userId: user.id });
+      // Close the GroupInfo panel after leaving
+      onClose(); 
     } else {
       console.error("No group selected");
     }
@@ -189,10 +172,8 @@ const GroupInfo = ({ open, onClose }) => {
     if (selectedGroup && user.id === selectedGroup.admin._id) {
       // Emit the event to delete the group
       socket.emit("deleteGroup", selectedGroup._id);
-
-      // Optionally show a confirmation message or update the UI
-      console.log("Deleting Group");
-      onClose(); // Close the GroupInfo panel after deleting
+      // Close the GroupInfo panel after deleting
+      onClose(); 
     } else {
       console.error("You are not the admin or no group selected");
     }
@@ -217,8 +198,8 @@ const GroupInfo = ({ open, onClose }) => {
       >
         <Alert severity={snackbarType} variant="filled" sx={{ width: "100%" }}>
           {snackbarType === "success"
-            ? "Group info saved successfully"
-            : "Some Error Occurred, try later."}
+            ? "Saved successfully"
+            : "Error Occurred, Try Later."}
         </Alert>
       </Snackbar>
       <Box
@@ -296,16 +277,16 @@ const GroupInfo = ({ open, onClose }) => {
           <Typography variant="h6">Members:</Typography>
           {members.length > 0 ? (
             members.map((member) => {
-              const isAdmin = member._id === selectedGroup.admin._id;
+              const isAdmin = member._id.toString() === selectedGroup.admin._id.toString();
               return (
                 <ContactCard
                   key={member._id}
                   username={member.username}
                   image={member.image}
                   sx={{
-                    border: isAdmin ? "2px solid white" : "none", // Highlight the admin with a white border
-                    padding: "4px", // Adjust padding for better appearance
-                    borderRadius: "8px", // Rounded corners for admin
+                    border: isAdmin ? "2px solid white" : "none",
+                    padding: "4px",
+                    borderRadius: "8px",
                   }}
                 />
               );

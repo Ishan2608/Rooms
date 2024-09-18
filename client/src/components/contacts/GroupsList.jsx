@@ -27,7 +27,7 @@ const GroupsList = () => {
     const fetchGroups = async () => {
       try {
         const response = await axios.get(CHAT_ROUTES.GET_ALL_GROUPS, {
-          withCredentials: true, // Include cookies with the request
+          withCredentials: true,
         });
         updateGroups(response.data || []); // Ensure groups is an array
         setLoading(false);

@@ -89,39 +89,13 @@ export const setupSocket = (server) => {
 
       // Notify all group members about the new group
       populatedGroup.members.forEach((member) => {
-        const memberSocket = userMap.get(member._id);
+        const memberSocket = userMap.get(member._id.toString());
         if (memberSocket) {
           io.to(memberSocket).emit("groupCreated", populatedGroup);
         }
       });
     } catch (error) {
       console.error("Error creating group:", error);
-    }
-  };
-
-  const updateGroupInfo = async (data) => {
-    try {
-      const { id, name, description } = data;
-      const group = await Group.findById(id).populate("members");
-
-      if (!group) return;
-
-      // Update group details
-      group.name = name;
-      group.description = description;
-
-      // Save updated group
-      await group.save();
-
-      // Emit the event to notify group members
-      group.members.forEach((member) => {
-        const memberSocket = userMap.get(member._id.toString());
-        if (memberSocket) {
-          io.to(memberSocket).emit("groupInfoUpdated", group);
-        }
-      });
-    } catch (error) {
-      console.error("Error handling updateGroupInfo event:", error);
     }
   };
 
@@ -256,7 +230,6 @@ export const setupSocket = (server) => {
     socket.on("sendMessage", sendMessage);
     socket.on("sendGroupMessage", sendGroupMessage);
     socket.on("createGroup", createGroup);
-    socket.on("updateGroupInfo", updateGroupInfo);
     socket.on("leaveGroup", leaveGroup)
     socket.on("deleteGroup", deleteGroup);
     socket.on("disconnect", () => disconnect(socket));

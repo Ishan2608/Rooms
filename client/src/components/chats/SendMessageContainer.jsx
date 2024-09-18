@@ -105,20 +105,18 @@ const SendMessageContainer = () => {
   const handleSendFileMessage = async () => {
     if (isSending || !file) return;
     setIsSending(true);
-
-    const toGroup = selectedGroup ? selectedGroup._id : null;
-    const toUser = selectedContact ? selectedContact._id : null;
-    const date = Date.now();
+    const createdAt = Date.now();
 
     const formData = new FormData();
+    formData.append("sender", user.id);
     if (selectedContact) {
-      formData.append("recipient", toUser);
+      formData.append("recipient", selectedContact._id);
     }
     if (selectedGroup) {
-      formData.append("group", toGroup);
+      formData.append("group", selectedGroup._id);
     }
     formData.append("file", file);
-    formData.append("createdAt", date);
+    formData.append("createdAt", createdAt);
 
     try {
       const response = await axios.post(

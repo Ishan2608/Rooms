@@ -23,7 +23,7 @@ const groupSchema = new mongoose.Schema({
   ],
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => Date.now(),
   },
   image: {
     type: String,
