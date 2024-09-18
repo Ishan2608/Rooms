@@ -40,11 +40,28 @@ export const addContact = async (req, res) => {
     }
 
     // Find the current user
-    const currentUser = await User.findById(req.userId);
+    const currentUser = await User.findById(req.userId)
+      .populate("contacts", "id")
+      .populate("unknownContacts", "id")
+      .populate("blockedContacts", "id")
 
     // Check if the contact is already in the user's contact list
     if (currentUser.contacts.includes(contactId)) {
       return res.status(400).json({ message: "Contact already exists" });
+    }
+
+    // If the contact is in unknown contacts, remove from there
+    if (currentUser.unknownContacts.includes(contactId)){
+      currentUser.unknownContacts = currentUser.unknownContacts.filter(
+        (user) => user._id.toString() !== contactId.toString()
+      )
+    }
+
+    // If the contact is blocked, remove from there.
+    if (currentUser.blockedContacts.includes(contactId)){
+      currentUser.blockedContacts = currentUser.blockedContacts.filter(
+        (user) => user._id.toString() !== contactId.toString()
+      );
     }
 
     // Add the contactId to the user's contact list
@@ -52,6 +69,7 @@ export const addContact = async (req, res) => {
     await currentUser.save();
 
     res.status(200).json({ message: "Contact added successfully" });
+    
   } catch (error) {
     console.error("Error adding contact:", error);
     res.status(500).json({ message: "Failed to add contact" });

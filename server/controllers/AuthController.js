@@ -151,7 +151,7 @@ const deleteOldImage = (imagePath) => {
     const filePath = path.join(__dirname, '..', 'public', imagePath);
     fs.unlink(filePath, (err) => {
       if (err) {
-        console.error("Error deleting old image:", err);
+        console.error("Old Path is Not Defined.");
       }
     });
   }
@@ -183,11 +183,10 @@ export const updateProfileInfo = async (req, res, next) => {
 
     // Update image if provided
     if (req.file) {
-      // console.log("Provided File is: ");
-      // console.log(req.file);
-      // Delete old image if it exists
       const oldImagePath = user.image;
-      deleteOldImage(oldImagePath);
+      if (user.image !== ""){
+        deleteOldImage(oldImagePath);
+      }
 
       // Save new image
       const imageUrl = `/images/users/${req.file.filename}`;

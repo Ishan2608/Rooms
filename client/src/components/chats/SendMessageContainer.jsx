@@ -80,7 +80,7 @@ const SendMessageContainer = () => {
         recipient: selectedContact ? selectedContact._id : null,
         content: message,
         group: selectedGroup ? selectedGroup._id : null,
-        createdAt: () => Date.now(),
+        createdAt: Date.now(),
       };
 
       if (newMessage.group) {
