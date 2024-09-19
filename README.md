@@ -1,7 +1,7 @@
 # Rooms
 A real-time chat application built using MERN stack, enabling user-to-user and user-to-group messaging with text, images, and file sharing capabilities.
 
-<video src="./Rooms.mp4" width="100%" height="auto" controls></video>
+<img src="./Rooms.gif" />
 
 ## Features
 - Real-time messaging for individuals and groups
